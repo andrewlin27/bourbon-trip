@@ -106,24 +106,24 @@ Here are the point scoring opportunities. The value of each one is undecided as 
 
 ### Power rankings
 Display the current power ranking. These are determined by the two team captains. Right now, title it "Pre-season power rankings". These were determined by three criteria: MVP prediction, bourbon knowledge, and perceived aura. Here are the pre-season rankings in order:
-1. Jackson David
-2. Nick Dittemore
-3. Brandon Turnage
-4. Nate Mathews
-5. Lucas Giammona
-6. Andrew Lin
-7. Calvin Turrell
-8. Nick Caso
-9. Juan Nerio
-10. Nafi Islam
-11. Juan Ardila
-12. Eric McGonagle
-13. Scott Trouy
-14. Kyle Dessens
-15. Jacob Technik
-16. Joseph Valenta
-17. Alan Marini
-18. Jess Holbert
+1. Jackson David - jacksondavid2002@yahoo.com
+2. Nick Dittemore - nickdittemo@gmail.com
+3. Brandon Turnage - brandon.turnage03@gmail.com
+4. Nate Mathews - Nathanielm001@gmail.com
+5. Lucas Giammona - lucasmgiammona@gmail.com
+6. Andrew Lin - andrew.mlin27@gmail.com
+7. Calvin Turrell - calvin.turrell@gmail.com
+8. Nick Caso - nickcaso32@gmail.com
+9. Juan Nerio - Juanmnerio@gmail.com
+10. Nafi Islam - nafi.islam321@gmail.com
+11. Juan Ardila - Juancardila2@gmail.com
+12. Eric McGonagle - ermcgonagle@gmail.com
+13. Scott Trouy - Smct1118@gmail.com
+14. Kyle Dessens - kyledessens@yahoo.com
+15. Jacob Technik - jltechnik22@gmail.com
+16. Joseph Valenta - Joseph.valenta5@gmail.com
+17. Alan Marini - Alan.j.marini@gmail.com
+18. Jess Holbert - Jessholbert37@gmail.com
 
 ### Spin the Wheel 
 Throughout the trip, we will need to volunteer someone to do various tasks. Create a wheel with all 18 people's name on it. Upon a click, it should animate a spin and land on someone at random. 

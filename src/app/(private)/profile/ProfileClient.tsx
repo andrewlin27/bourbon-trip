@@ -27,6 +27,7 @@ export default function ProfileClient({
   allUsers,
 }: Props) {
   const [packages, setPackages] = useState(pendingPackages)
+  const [previewForm, setPreviewForm] = useState(false)
 
   if (!currentUser) {
     return (
@@ -91,7 +92,7 @@ export default function ProfileClient({
         <PromptAnswerForm initialProfile={profile} />
       </section>
 
-      {/* Team preference form (not shown to captains) */}
+      {/* Team preference form (non-captains) */}
       {!currentUser.is_captain && (
         <section className="bg-white rounded-xl border border-stone-200 p-5">
           <h2 className="font-semibold text-stone-800 mb-1">Team Preference</h2>
@@ -103,6 +104,28 @@ export default function ProfileClient({
             nonCaptainUsers={nonCaptains}
             currentUserId={currentUser.id}
           />
+        </section>
+      )}
+
+      {/* Captain preview of the preference form (testing only) */}
+      {currentUser.is_captain && (
+        <section className="border border-dashed border-stone-300 rounded-xl p-5">
+          <button
+            onClick={() => setPreviewForm((v) => !v)}
+            className="w-full flex items-center justify-between text-sm text-stone-400 hover:text-stone-600"
+          >
+            <span>🔍 Preview preference form <span className="text-xs">(captain testing only)</span></span>
+            <span>{previewForm ? '▲' : '▼'}</span>
+          </button>
+          {previewForm && (
+            <div className="mt-4">
+              <PreferenceForm
+                existingPreference={existingPreference}
+                nonCaptainUsers={nonCaptains}
+                currentUserId={currentUser.id}
+              />
+            </div>
+          )}
         </section>
       )}
 

@@ -158,7 +158,7 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
           Package request <span className="text-stone-400 font-normal">(optional)</span>
         </label>
         <p className="text-xs text-stone-400 mb-3">
-          Select friends you want on the same team. They'll receive an invite to accept or decline.
+          Select friends you want on the same team — only one person in the group needs to submit this. They&apos;ll receive an invite to accept or decline.
         </p>
         <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
           {nonCaptainUsers.map((u) => (

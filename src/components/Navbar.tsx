@@ -19,17 +19,27 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
+  const [isCaptain, setIsCaptain] = useState(false)
 
   useEffect(() => {
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
+
+    const loadUser = async (userId: string | undefined) => {
+      if (!userId) { setIsCaptain(false); return }
+      const { data } = await supabase.from('users').select('is_captain').eq('id', userId).single()
+      setIsCaptain(data?.is_captain ?? false)
+    }
+
     supabase.auth.getSession().then(({ data }) => {
       setLoggedIn(!!data.session)
+      loadUser(data.session?.user?.id)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setLoggedIn(!!session)
+      loadUser(session?.user?.id)
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -76,6 +86,14 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {isCaptain && (
+              <Link
+                href="/admin"
+                className={`hover:text-bourbon-gold transition-colors ${pathname === '/admin' ? 'text-bourbon-gold' : ''}`}
+              >
+                Admin
+              </Link>
+            )}
             {profileButton}
           </div>
 
@@ -108,6 +126,15 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {isCaptain && (
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className={`hover:text-bourbon-gold transition-colors ${pathname === '/admin' ? 'text-bourbon-gold' : ''}`}
+              >
+                Admin
+              </Link>
+            )}
             <div>{profileButton}</div>
           </div>
         )}
