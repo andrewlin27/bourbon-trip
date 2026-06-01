@@ -189,7 +189,7 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
                   </svg>
                 )}
               </span>
-              {u.name.split(' ')[0]}
+              {u.name}
             </label>
           ))}
         </div>

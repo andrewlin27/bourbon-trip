@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { prompt1_question, prompt1_answer, prompt2_question, prompt2_answer } = body
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const { error } = await admin.from('profiles').upsert({
     user_id: user.id,
     prompt1_question,

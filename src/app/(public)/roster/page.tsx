@@ -26,7 +26,7 @@ export default async function RosterPage() {
         <h1 className="font-serif text-3xl font-bold text-bourbon-dark">Roster</h1>
         <p className="text-stone-400 text-sm mt-1">18 players · ACE Bourbon Trip 2026</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {users.map((user) => (
           <PlayerCard key={user.id} user={user} teamsRevealed={teamsRevealed} />
         ))}

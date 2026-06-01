@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid team' }, { status: 400 })
   }
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const { data: current } = await admin
     .from('scores')
     .select('points')

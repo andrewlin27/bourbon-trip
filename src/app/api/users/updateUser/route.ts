@@ -8,7 +8,7 @@ export async function PUT(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
 
   // Captains can update any user's team; others can only update their own flight/avatar
   if (body.id && body.id !== user.id) {

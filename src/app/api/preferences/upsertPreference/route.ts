@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { team_preference, committee_rank_1, committee_rank_2, committee_rank_3 } = body
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const { error } = await admin.from('preference_submissions').upsert({
     user_id: user.id,
     team_preference,

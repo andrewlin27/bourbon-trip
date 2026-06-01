@@ -33,6 +33,7 @@ interface UserRow {
   name: string
   team: string | null
   is_captain: boolean
+  avatar_url?: string | null
 }
 
 interface Props {
@@ -43,7 +44,7 @@ interface Props {
   settings: AppSettings | null
 }
 
-type Tab = 'submissions' | 'packages' | 'rankings' | 'teams'
+type Tab = 'submissions' | 'packages' | 'rankings' | 'teams' | 'photos'
 
 export default function AdminClient({ preferences, packageRequests, rankings, allUsers, settings }: Props) {
   const [tab, setTab] = useState<Tab>('submissions')
@@ -54,6 +55,10 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
   const [teamsRevealed, setTeamsRevealed] = useState(settings?.teams_revealed ?? false)
   const [teamAssignments, setTeamAssignments] = useState<Record<string, string>>(
     Object.fromEntries(allUsers.map((u) => [u.id, u.team ?? '']))
+  )
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
+  const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>(
+    Object.fromEntries(allUsers.filter(u => u.avatar_url).map(u => [u.id, u.avatar_url!]))
   )
   const [savingTeams, setSavingTeams] = useState(false)
   const [teamsSaved, setTeamsSaved] = useState(false)
@@ -81,6 +86,19 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
     })
     setSaving(false)
     setSaved(true)
+  }
+
+  const uploadPhoto = async (userId: string, file: File) => {
+    setUploadingId(userId)
+    const form = new FormData()
+    form.append('file', file)
+    form.append('userId', userId)
+    const res = await fetch('/api/users/uploadAvatar', { method: 'POST', body: form })
+    if (res.ok) {
+      const { url } = await res.json()
+      setAvatarUrls(prev => ({ ...prev, [userId]: url }))
+    }
+    setUploadingId(null)
   }
 
   const toggleTeamsRevealed = async () => {
@@ -114,6 +132,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
     { key: 'packages', label: 'Packages' },
     { key: 'rankings', label: 'Rankings' },
     { key: 'teams', label: 'Teams' },
+    { key: 'photos', label: 'Photos' },
   ]
 
   return (
@@ -279,6 +298,48 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
           >
             {savingTeams ? 'Saving…' : 'Save team assignments'}
           </button>
+        </div>
+      )}
+
+      {/* Photos */}
+      {tab === 'photos' && (
+        <div className="space-y-2">
+          <p className="text-sm text-stone-500">Upload a headshot for each player. Replaces any existing photo.</p>
+          {allUsers.map((u) => (
+            <div key={u.id} className="bg-white border border-stone-200 rounded-xl px-4 py-3 flex items-center gap-3">
+              {/* Thumbnail */}
+              <div className="w-12 h-16 rounded-lg bg-stone-100 overflow-hidden shrink-0 flex items-center justify-center">
+                {avatarUrls[u.id] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrls[u.id]} alt={u.name} className="w-full h-full object-cover object-top" />
+                ) : (
+                  <span className="text-stone-400 text-xs font-semibold">{u.name.charAt(0)}</span>
+                )}
+              </div>
+
+              <span className="flex-1 text-sm font-medium text-stone-800">{u.name}</span>
+
+              {/* Upload button */}
+              <label className={`cursor-pointer text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${
+                uploadingId === u.id
+                  ? 'bg-stone-100 text-stone-400 border-stone-200'
+                  : 'bg-white text-bourbon-amber border-bourbon-amber hover:bg-bourbon-cream'
+              }`}>
+                {uploadingId === u.id ? 'Uploading…' : avatarUrls[u.id] ? 'Replace' : 'Upload'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  disabled={uploadingId !== null}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) uploadPhoto(u.id, file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            </div>
+          ))}
         </div>
       )}
     </div>

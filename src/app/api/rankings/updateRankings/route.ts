@@ -11,7 +11,7 @@ export async function PUT(req: NextRequest) {
 
   const { rankings, season_label }: { rankings: { user_id: string; rank: number }[]; season_label: string } = await req.json()
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const rows = rankings.map(({ user_id, rank }) => ({
     user_id,
     rank,

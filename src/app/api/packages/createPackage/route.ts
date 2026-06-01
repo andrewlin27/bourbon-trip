@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No requestees provided' }, { status: 400 })
   }
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const rows = requestee_ids.map((id) => ({
     requester_id: user.id,
     requestee_id: id,

@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest) {
   }
 
   const body = await req.json()
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const { error } = await admin
     .from('app_settings')
     .update(body)

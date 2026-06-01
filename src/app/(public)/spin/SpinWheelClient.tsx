@@ -145,17 +145,24 @@ export default function SpinWheelClient({ allUsers, teamsRevealed }: Props) {
     <div className="space-y-6">
       {/* Wheel */}
       <div className="relative flex justify-center">
-        {/* Pointer */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-0 h-0"
-          style={{ borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '20px solid #C27D38' }}
-        />
-        <canvas
-          ref={canvasRef}
-          width={300}
-          height={300}
-          className="rounded-full shadow-lg cursor-pointer"
-          onClick={spin}
-        />
+        {selectedUsers.length === 0 ? (
+          <div className="w-[300px] h-[300px] rounded-full bg-stone-100 flex items-center justify-center">
+            <p className="text-stone-400 text-sm text-center px-8">Select at least one person below</p>
+          </div>
+        ) : (
+          <>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-0 h-0"
+              style={{ borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '20px solid #C27D38' }}
+            />
+            <canvas
+              ref={canvasRef}
+              width={300}
+              height={300}
+              className="rounded-full shadow-lg cursor-pointer"
+              onClick={spin}
+            />
+          </>
+        )}
       </div>
 
       {/* Winner */}
@@ -186,6 +193,12 @@ export default function SpinWheelClient({ allUsers, teamsRevealed }: Props) {
               className="text-xs text-bourbon-amber underline underline-offset-2"
             >
               All
+            </button>
+            <button
+              onClick={() => { setSelected([]); setWinner(null) }}
+              className="text-xs text-stone-400 underline underline-offset-2"
+            >
+              None
             </button>
             {teamsRevealed && (
               <>

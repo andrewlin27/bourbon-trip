@@ -12,7 +12,7 @@ export async function PUT(
 
   const { status }: { status: 'accepted' | 'declined' } = await req.json()
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
 
   // Fetch the request to verify user is the requestee
   const { data: pkgReq, error: fetchErr } = await admin

@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const admin = await createClientServiceRoleKey()
+  const admin = createClientServiceRoleKey()
   const { data, error } = await admin
     .from('preference_submissions')
     .select('*, users(name, email)')
