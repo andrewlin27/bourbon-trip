@@ -202,30 +202,45 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
       )}
 
       {/* Packages */}
-      {tab === 'packages' && (
-        <div className="space-y-2">
-          {packageRequests.length === 0 ? (
-            <p className="text-stone-400 text-sm">No package requests yet.</p>
-          ) : (
-            packageRequests.map((p) => (
-              <div key={p.id} className="bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm flex justify-between items-center">
-                <span className="text-stone-700">
-                  <span className="font-semibold">{p.requester.name}</span>
-                  {' → '}
-                  <span className="font-semibold">{p.requestee.name}</span>
-                </span>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                  p.status === 'accepted' ? 'bg-green-100 text-green-700'
-                  : p.status === 'declined' ? 'bg-stone-100 text-stone-500'
-                  : 'bg-yellow-100 text-yellow-700'
-                }`}>
-                  {p.status}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      )}
+      {tab === 'packages' && (() => {
+        const groups = packageRequests.reduce<Map<string, PackageReq[]>>((acc, p) => {
+          const key = p.requester.name
+          if (!acc.has(key)) acc.set(key, [])
+          acc.get(key)!.push(p)
+          return acc
+        }, new Map())
+
+        return (
+          <div className="space-y-3">
+            {groups.size === 0 ? (
+              <p className="text-stone-400 text-sm">No package requests yet.</p>
+            ) : (
+              [...groups.entries()].map(([requesterName, reqs]) => (
+                <div key={requesterName} className="bg-white border border-stone-200 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-stone-100 bg-stone-50">
+                    <p className="text-sm font-semibold text-stone-800">{requesterName}</p>
+                    <p className="text-xs text-stone-400">{reqs.length} {reqs.length === 1 ? 'request' : 'requests'}</p>
+                  </div>
+                  <div className="divide-y divide-stone-100">
+                    {reqs.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between px-4 py-2.5">
+                        <span className="text-sm text-stone-700">{p.requestee.name}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          p.status === 'accepted' ? 'bg-green-100 text-green-700'
+                          : p.status === 'declined' ? 'bg-stone-100 text-stone-500'
+                          : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )
+      })()}
 
       {/* Rankings */}
       {tab === 'rankings' && (
@@ -288,12 +303,13 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
             <p className="text-sm font-medium text-stone-700 mb-3">Assign teams &amp; committees</p>
             <div className="space-y-1.5">
               {allUsers.filter((u) => !u.is_captain).map((u) => (
-                <div key={u.id} className="flex items-center gap-2 bg-white border border-stone-200 rounded-xl px-3 py-2">
-                  <span className="flex-1 text-sm text-stone-800 min-w-0 truncate">{u.name}</span>
+                <div key={u.id} className="bg-white border border-stone-200 rounded-xl px-3 py-2 space-y-1.5">
+                  <span className="block text-sm font-medium text-stone-800">{u.name}</span>
+                  <div className="grid grid-cols-2 gap-2">
                   <select
                     value={teamAssignments[u.id] ?? ''}
                     onChange={(e) => setTeamAssignments((prev) => ({ ...prev, [u.id]: e.target.value }))}
-                    className="border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white shrink-0"
+                    className="w-full border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white"
                   >
                     <option value="">No team</option>
                     <option value="lin">Team Lin</option>
@@ -302,13 +318,14 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
                   <select
                     value={committeeAssignments[u.id] ?? ''}
                     onChange={(e) => setCommitteeAssignments((prev) => ({ ...prev, [u.id]: e.target.value }))}
-                    className="border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white shrink-0"
+                    className="w-full border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white"
                   >
                     <option value="">No committee</option>
                     {COMMITTEE_ROLES.map((r) => (
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>
+                  </div>
                 </div>
               ))}
             </div>
