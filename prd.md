@@ -93,7 +93,6 @@ Here are the point scoring opportunities. The value of each one is undecided as 
 * During the Alumni Retreat:
   * Bourbon related:
     * Blind tasting competition  
-    * Mashbill guessing  
     * Proof guessing  
     * MSRP guessing  
   * Trivia night  

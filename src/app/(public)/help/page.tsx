@@ -11,8 +11,9 @@ export default function HelpPage() {
         <section>
           <h2 className="font-serif text-xl font-bold text-bourbon-dark mb-3">Team Selection</h2>
           <p>
-            On your profile, select whether to package with friends and whether you prefer Team Lin,
-            Team Ditty, or neither. Teams will be manually selected by the captains based on everyone&apos;s
+            On your profile, select your team preference of Team Lin, Team Ditty, or neither. Then optionally
+            send requests to package with friends. You can only be in a maximum of one group package. Teams will 
+            be manually selected by the captains based on everyone&apos;s
             preference. The players essentially choose their own fate. All revealed at Alumni Retreat.
           </p>
         </section>
@@ -27,7 +28,7 @@ export default function HelpPage() {
             {[
               ['Lead (2)', 'Each team has one lead member to make group decisions and represent their team in games.'],
               ['Food (3)', 'Decide where to eat lunch/dinners and how to split the group, if necessary.'],
-              ['Instagram/Pics (3)', 'Keep the shared Instagram account active and take pics/videos for the YouTube video afterwards.'],
+              ['Media (3)', 'Keep the shared Instagram account active and take pics/videos for the YouTube video afterwards.'],
               ['Venmo Logging (2)', 'Keep receipts for all group purchases and log them in the Venmo group.'],
               ['Uber/Lyft (3)', 'Order rideshare. For 18 people we should only need three UberXL\'s at most (up to 6 each).'],
               ['Navigation & Crowd Control (3)', 'Guide the group to our destinations. Also responsible for gathering everyone for transportation.'],
@@ -42,7 +43,31 @@ export default function HelpPage() {
 
         <section>
           <h2 className="font-serif text-xl font-bold text-bourbon-dark mb-3">Point System</h2>
-          <p>Each team earns points through events before and during the trip.</p>
+          <p className="mb-4">Each team earns points through events before and during the trip. Point values are TBD.</p>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-bourbon-amber mb-2">Alumni Retreat</p>
+              <ul className="space-y-1">
+                {['Blind tasting competition', 'Proof guessing', 'MSRP guessing', 'Trivia night', 'Beer olympics'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-stone-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-bourbon-amber shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-bourbon-amber mb-2">During the Trip</p>
+              <ul className="space-y-1">
+                {['Best distillery photo', 'Most beers per day', 'Pub golf', 'Best gift shop purchase'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-stone-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-bourbon-amber shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section>

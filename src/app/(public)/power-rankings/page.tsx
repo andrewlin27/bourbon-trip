@@ -1,4 +1,5 @@
 import { createClientAnonKey } from '@/utils/supabase/server'
+import Image from 'next/image'
 
 export const revalidate = 60
 
@@ -29,7 +30,7 @@ export default async function PowerRankingsPage() {
           {rankings.map((entry) => {
             const rank = entry.rank as number
             const total = rankings.length
-            const isBottom3 = rank > total - 3
+            const bottomEmoji = rank === total ? '💩' : rank === total - 1 ? '🚽' : rank === total - 2 ? '🤡' : null
             // Supabase returns joined row as object (many-to-one)
             const user = (Array.isArray(entry.users) ? entry.users[0] : entry.users) as { id: string; name: string; avatar_url: string | null } | null
             const medal =
@@ -50,9 +51,17 @@ export default async function PowerRankingsPage() {
                     <span className="text-sm font-bold text-stone-400">{rank}</span>
                   )}
                 </span>
-                <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center shrink-0">
-                  {isBottom3 ? (
-                    <span className="text-lg">🤡</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${bottomEmoji ? 'bg-transparent' : 'bg-stone-200'}`}>
+                  {bottomEmoji ? (
+                    <span className="text-lg">{bottomEmoji}</span>
+                  ) : user?.avatar_url ? (
+                    <Image
+                      src={user.avatar_url}
+                      alt={user.name}
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-cover object-top"
+                    />
                   ) : (
                     <span className="text-stone-500 text-sm font-semibold">
                       {user?.name?.charAt(0) ?? '?'}

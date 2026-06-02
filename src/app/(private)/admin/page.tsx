@@ -15,7 +15,7 @@ export default async function AdminPage() {
     admin.from('preference_submissions').select('*, users(name, email)').order('submitted_at'),
     admin.from('package_requests').select('*, requester:users!requester_id(name), requestee:users!requestee_id(name)').order('created_at'),
     admin.from('power_rankings').select('rank, season_label, user_id, users(id, name)').order('rank'),
-    admin.from('users').select('id, name, team, is_captain, avatar_url').order('name'),
+    admin.from('users').select('id, name, team, committee, is_captain, avatar_url').order('name'),
     admin.from('app_settings').select('*').single(),
   ])
 

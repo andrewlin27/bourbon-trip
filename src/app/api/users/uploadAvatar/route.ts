@@ -1,6 +1,9 @@
 import { createClientAnonKey, createClientServiceRoleKey } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { CAPTAIN_EMAILS } from '@/types/index'
+import sharp from 'sharp'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const heicConvert = require('heic-convert') as (opts: { buffer: Buffer; format: 'JPEG'; quality: number }) => Promise<Uint8Array>
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,19 +24,27 @@ export async function POST(req: NextRequest) {
     console.log('Upload attempt:', { name: file.name, type: file.type, size: file.size, userId })
 
     const arrayBuffer = await file.arrayBuffer()
-    const buffer = new Uint8Array(arrayBuffer)
+    let inputBuffer = Buffer.from(arrayBuffer)
 
-    const mimeType = file.type || 'image/jpeg'
-    const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg'
-    const path = `${userId}.${ext}`
+    const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+      file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')
 
-    console.log('Uploading to storage:', { path, mimeType, bytes: buffer.byteLength })
+    if (isHeic) {
+      const result = await heicConvert({ buffer: inputBuffer, format: 'JPEG', quality: 0.9 })
+      inputBuffer = Buffer.from(result)
+    }
+
+    const converted = await sharp(inputBuffer).rotate().jpeg({ quality: 90 }).toBuffer()
+
+    const path = `${userId}.jpg`
+
+    console.log('Uploading to storage:', { path, bytes: converted.byteLength })
 
     const admin = createClientServiceRoleKey()
 
     const { data: uploadData, error: uploadErr } = await admin.storage
       .from('avatars')
-      .upload(path, buffer, { upsert: true, contentType: mimeType })
+      .upload(path, converted, { upsert: true, contentType: 'image/jpeg' })
 
     console.log('Storage result:', { uploadData, uploadErr })
 
@@ -42,15 +53,16 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: { publicUrl } } = admin.storage.from('avatars').getPublicUrl(path)
+    const urlWithBust = `${publicUrl}?t=${Date.now()}`
 
     const { error: updateErr } = await admin
       .from('users')
-      .update({ avatar_url: publicUrl })
+      .update({ avatar_url: urlWithBust })
       .eq('id', userId)
 
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
-    return NextResponse.json({ url: publicUrl }, { status: 200 })
+    return NextResponse.json({ url: urlWithBust }, { status: 200 })
   } catch (e) {
     console.error('Upload route error:', e)
     return NextResponse.json({ error: String(e) }, { status: 500 })

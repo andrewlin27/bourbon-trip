@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
     }
     const { error } = await admin
       .from('users')
-      .update({ team: body.team ?? null })
+      .update({ team: body.team ?? null, committee: body.committee ?? null })
       .eq('id', body.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true }, { status: 200 })

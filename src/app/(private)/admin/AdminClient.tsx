@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AppSettings } from '@/types/index'
+import { AppSettings, COMMITTEE_ROLES } from '@/types/index'
 
 interface Preference {
   user_id: string
@@ -32,6 +32,7 @@ interface UserRow {
   id: string
   name: string
   team: string | null
+  committee: string | null
   is_captain: boolean
   avatar_url?: string | null
 }
@@ -55,6 +56,9 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
   const [teamsRevealed, setTeamsRevealed] = useState(settings?.teams_revealed ?? false)
   const [teamAssignments, setTeamAssignments] = useState<Record<string, string>>(
     Object.fromEntries(allUsers.map((u) => [u.id, u.team ?? '']))
+  )
+  const [committeeAssignments, setCommitteeAssignments] = useState<Record<string, string>>(
+    Object.fromEntries(allUsers.map((u) => [u.id, u.committee ?? '']))
   )
   const [uploadingId, setUploadingId] = useState<string | null>(null)
   const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>(
@@ -115,11 +119,15 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
     setSavingTeams(true)
     setTeamsSaved(false)
     await Promise.all(
-      Object.entries(teamAssignments).map(([id, team]) =>
+      allUsers.filter((u) => !u.is_captain).map((u) =>
         fetch('/api/users/updateUser', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, team: team || null }),
+          body: JSON.stringify({
+            id: u.id,
+            team: teamAssignments[u.id] || null,
+            committee: committeeAssignments[u.id] || null,
+          }),
         })
       )
     )
@@ -275,21 +283,31 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
             </button>
           </div>
 
-          {/* Team assignment */}
+          {/* Team + committee assignment */}
           <div>
-            <p className="text-sm font-medium text-stone-700 mb-3">Assign teams</p>
+            <p className="text-sm font-medium text-stone-700 mb-3">Assign teams &amp; committees</p>
             <div className="space-y-1.5">
               {allUsers.filter((u) => !u.is_captain).map((u) => (
-                <div key={u.id} className="flex items-center gap-3 bg-white border border-stone-200 rounded-xl px-3 py-2">
-                  <span className="flex-1 text-sm text-stone-800">{u.name}</span>
+                <div key={u.id} className="flex items-center gap-2 bg-white border border-stone-200 rounded-xl px-3 py-2">
+                  <span className="flex-1 text-sm text-stone-800 min-w-0 truncate">{u.name}</span>
                   <select
                     value={teamAssignments[u.id] ?? ''}
                     onChange={(e) => setTeamAssignments((prev) => ({ ...prev, [u.id]: e.target.value }))}
-                    className="border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white"
+                    className="border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white shrink-0"
                   >
-                    <option value="">Unassigned</option>
+                    <option value="">No team</option>
                     <option value="lin">Team Lin</option>
                     <option value="ditty">Team Ditty</option>
+                  </select>
+                  <select
+                    value={committeeAssignments[u.id] ?? ''}
+                    onChange={(e) => setCommitteeAssignments((prev) => ({ ...prev, [u.id]: e.target.value }))}
+                    className="border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white shrink-0"
+                  >
+                    <option value="">No committee</option>
+                    {COMMITTEE_ROLES.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
                   </select>
                 </div>
               ))}

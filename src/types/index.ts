@@ -5,7 +5,7 @@ export type PackageStatus = 'pending' | 'accepted' | 'declined'
 export type CommitteeRole =
   | 'Team Lead'
   | 'Food'
-  | 'Instagram/Pics'
+  | 'Media'
   | 'Venmo Logging'
   | 'Uber/Lyft'
   | 'Navigation & Crowd Control'
@@ -13,11 +13,20 @@ export type CommitteeRole =
 export const COMMITTEE_ROLES: CommitteeRole[] = [
   'Team Lead',
   'Food',
-  'Instagram/Pics',
+  'Media',
   'Venmo Logging',
   'Uber/Lyft',
   'Navigation & Crowd Control',
 ]
+
+export const COMMITTEE_SHORT_NAMES: Record<CommitteeRole, string> = {
+  'Team Lead': 'Lead',
+  'Food': 'Food',
+  'Media': 'Media',
+  'Venmo Logging': 'Venmo',
+  'Uber/Lyft': 'Rideshare',
+  'Navigation & Crowd Control': 'Navigation',
+}
 
 export const PROMPT_BANK = [
   'Favorite bourbon',
@@ -65,6 +74,7 @@ export interface User {
   email: string
   name: string
   team: Team | null
+  committee: CommitteeRole | null
   is_captain: boolean
   is_team_lead: boolean
   avatar_url: string | null

@@ -1,4 +1,4 @@
-import { UserWithDetails } from '@/types/index'
+import { UserWithDetails, COMMITTEE_SHORT_NAMES, CommitteeRole } from '@/types/index'
 import Image from 'next/image'
 
 interface Props {
@@ -54,15 +54,21 @@ export default function PlayerCard({ user, teamsRevealed }: Props) {
         <div>
           <p className="font-serif font-bold text-lg text-stone-900 leading-tight">{user.name}</p>
           <div className="flex flex-wrap items-center gap-1.5 mt-1">
-            {user.is_captain && (
-              <span className="text-xs bg-bourbon-gold/20 text-bourbon-dark px-2 py-0.5 rounded-full font-medium">
-                Captain
-              </span>
-            )}
             {teamsRevealed && user.team && (
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${teamColor}`}>
                 Team {user.team === 'lin' ? 'Lin' : 'Ditty'}
               </span>
+            )}
+            {user.is_captain ? (
+              <span className="text-xs bg-bourbon-gold/20 text-bourbon-dark px-2 py-0.5 rounded-full font-medium">
+                Captain
+              </span>
+            ) : (
+              teamsRevealed && user.committee && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-stone-100 text-stone-600">
+                  {COMMITTEE_SHORT_NAMES[user.committee as CommitteeRole] ?? user.committee}
+                </span>
+              )
             )}
           </div>
         </div>
