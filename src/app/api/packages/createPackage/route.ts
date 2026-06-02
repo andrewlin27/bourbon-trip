@@ -24,5 +24,12 @@ export async function POST(req: NextRequest) {
     .upsert(rows, { onConflict: 'requester_id,requestee_id' })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true }, { status: 200 })
+
+  const { data: created } = await admin
+    .from('package_requests')
+    .select('id, status, requestee:users!requestee_id(id, name)')
+    .eq('requester_id', user.id)
+    .in('requestee_id', requestee_ids)
+
+  return NextResponse.json({ success: true, packages: created ?? [] }, { status: 200 })
 }

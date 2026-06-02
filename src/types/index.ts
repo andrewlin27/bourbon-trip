@@ -1,5 +1,5 @@
 export type Team = 'lin' | 'ditty'
-export type TeamPreference = 'lin' | 'ditty' | 'none'
+export type TeamPreference = 'lin' | 'ditty' | 'none' | ''
 export type PackageStatus = 'pending' | 'accepted' | 'declined'
 
 export type CommitteeRole =

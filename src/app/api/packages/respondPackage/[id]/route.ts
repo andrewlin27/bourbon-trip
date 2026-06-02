@@ -28,6 +28,21 @@ export async function PUT(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // Prevent accepting a second group
+  if (status === 'accepted') {
+    const { data: alreadyAccepted } = await admin
+      .from('package_requests')
+      .select('id')
+      .eq('requestee_id', user.id)
+      .eq('status', 'accepted')
+      .neq('id', id)
+      .limit(1)
+
+    if (alreadyAccepted?.length) {
+      return NextResponse.json({ error: 'You have already accepted a package group' }, { status: 409 })
+    }
+  }
+
   // Update the status
   const { error: updateErr } = await admin
     .from('package_requests')

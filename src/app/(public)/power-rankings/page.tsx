@@ -28,6 +28,8 @@ export default async function PowerRankingsPage() {
         <ol className="space-y-2">
           {rankings.map((entry) => {
             const rank = entry.rank as number
+            const total = rankings.length
+            const isBottom3 = rank > total - 3
             // Supabase returns joined row as object (many-to-one)
             const user = (Array.isArray(entry.users) ? entry.users[0] : entry.users) as { id: string; name: string; avatar_url: string | null } | null
             const medal =
@@ -49,9 +51,13 @@ export default async function PowerRankingsPage() {
                   )}
                 </span>
                 <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center shrink-0">
-                  <span className="text-stone-500 text-sm font-semibold">
-                    {user?.name?.charAt(0) ?? '?'}
-                  </span>
+                  {isBottom3 ? (
+                    <span className="text-lg">🤡</span>
+                  ) : (
+                    <span className="text-stone-500 text-sm font-semibold">
+                      {user?.name?.charAt(0) ?? '?'}
+                    </span>
+                  )}
                 </div>
                 <span className={`font-medium text-sm ${rank <= 3 ? 'text-bourbon-dark' : 'text-stone-800'}`}>
                   {user?.name ?? 'Unknown'}

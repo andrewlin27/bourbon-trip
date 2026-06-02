@@ -172,13 +172,19 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       p.team_preference === 'lin' ? 'bg-blue-100 text-blue-700'
                       : p.team_preference === 'ditty' ? 'bg-red-100 text-red-700'
-                      : 'bg-stone-100 text-stone-500'
+                      : p.team_preference === 'none' ? 'bg-stone-100 text-stone-500'
+                      : 'bg-yellow-50 text-yellow-600'
                     }`}>
-                      {p.team_preference === 'lin' ? 'Team Lin' : p.team_preference === 'ditty' ? 'Team Ditty' : 'No pref'}
+                      {p.team_preference === 'lin' ? 'Team Lin'
+                        : p.team_preference === 'ditty' ? 'Team Ditty'
+                        : p.team_preference === 'none' ? 'No pref'
+                        : 'Cleared'}
                     </span>
                   </div>
                   <p className="text-stone-400 text-xs mt-1">
-                    {p.committee_rank_1} · {p.committee_rank_2} · {p.committee_rank_3}
+                    {p.committee_rank_1
+                      ? `${p.committee_rank_1} · ${p.committee_rank_2} · ${p.committee_rank_3}`
+                      : 'No committee ranking'}
                   </p>
                 </div>
               ))}
@@ -265,7 +271,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
               onClick={toggleTeamsRevealed}
               className={`relative w-11 h-6 rounded-full transition-colors ${teamsRevealed ? 'bg-green-500' : 'bg-stone-300'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${teamsRevealed ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${teamsRevealed ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
 

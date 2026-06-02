@@ -3,17 +3,24 @@
 import { useState } from 'react'
 import { PreferenceSubmission, COMMITTEE_ROLES, CommitteeRole, TeamPreference } from '@/types/index'
 
+interface CreatedPackage {
+  id: string
+  status: 'pending' | 'accepted' | 'declined'
+  requestee: { id: string; name: string } | { id: string; name: string }[]
+}
+
 interface Props {
   existingPreference: PreferenceSubmission | null
   nonCaptainUsers: { id: string; name: string }[]
   currentUserId: string
+  onPackagesCreated?: (packages: CreatedPackage[]) => void
 }
 
 type ViewMode = 'form' | 'summary'
 
-export default function PreferenceForm({ existingPreference, nonCaptainUsers, currentUserId }: Props) {
+export default function PreferenceForm({ existingPreference, nonCaptainUsers, currentUserId, onPackagesCreated }: Props) {
   const [view, setView] = useState<ViewMode>(existingPreference ? 'summary' : 'form')
-  const [teamPref, setTeamPref] = useState<TeamPreference>(existingPreference?.team_preference ?? 'none')
+  const [teamPref, setTeamPref] = useState<TeamPreference>(existingPreference?.team_preference ?? '')
   const [selectedPartners, setSelectedPartners] = useState<string[]>([])
   const [ranks, setRanks] = useState<[CommitteeRole | '', CommitteeRole | '', CommitteeRole | '']>([
     (existingPreference?.committee_rank_1 as CommitteeRole) ?? '',
@@ -34,12 +41,11 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
   const availableFor = (idx: number) =>
     COMMITTEE_ROLES.filter((r) => !usedRoles.includes(r) || ranks[idx] === r)
 
-  const valid =
-    (teamPref as string) !== '' &&
-    ranks[0] !== '' &&
-    ranks[1] !== '' &&
-    ranks[2] !== '' &&
-    new Set(ranks).size === 3
+  const ranksValid =
+    ranks.every((r) => r === '') ||
+    (ranks.every((r) => r !== '') && new Set(ranks).size === 3)
+
+  const valid = ranksValid
 
   const handleSubmit = async () => {
     if (!valid) return
@@ -68,6 +74,11 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
 
       if (!prefRes.ok) throw new Error('Failed to save preference')
 
+      if (pkgRes && 'json' in pkgRes && pkgRes.ok && onPackagesCreated) {
+        const pkgData = await (pkgRes as Response).json()
+        if (pkgData.packages?.length) onPackagesCreated(pkgData.packages)
+      }
+
       const saved: PreferenceSubmission = {
         user_id: currentUserId,
         team_preference: teamPref,
@@ -87,7 +98,10 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
   }
 
   if (view === 'summary' && pref) {
-    const teamLabel = pref.team_preference === 'lin' ? 'Team Lin' : pref.team_preference === 'ditty' ? 'Team Ditty' : 'No Preference'
+    const teamLabel =
+      pref.team_preference === 'lin' ? 'Team Lin' :
+      pref.team_preference === 'ditty' ? 'Team Ditty' :
+      pref.team_preference === 'none' ? 'No Preference' : null
     return (
       <div className="space-y-4">
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
@@ -96,20 +110,32 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
         <div className="space-y-2 text-sm text-stone-700">
           <div className="flex justify-between">
             <span className="text-stone-500">Team preference</span>
-            <span className="font-medium">{teamLabel}</span>
+            {teamLabel
+              ? <span className="font-medium">{teamLabel}</span>
+              : <span className="text-stone-400 italic">Not submitted</span>
+            }
           </div>
-          <div className="flex justify-between">
-            <span className="text-stone-500">Committee rank 1</span>
-            <span className="font-medium">{pref.committee_rank_1}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-stone-500">Committee rank 2</span>
-            <span className="font-medium">{pref.committee_rank_2}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-stone-500">Committee rank 3</span>
-            <span className="font-medium">{pref.committee_rank_3}</span>
-          </div>
+          {pref.committee_rank_1 ? (
+            <>
+              <div className="flex justify-between">
+                <span className="text-stone-500">Committee rank 1</span>
+                <span className="font-medium">{pref.committee_rank_1}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-stone-500">Committee rank 2</span>
+                <span className="font-medium">{pref.committee_rank_2}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-stone-500">Committee rank 3</span>
+                <span className="font-medium">{pref.committee_rank_3}</span>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-between">
+              <span className="text-stone-500">Committee ranking</span>
+              <span className="text-stone-400 italic">Not submitted</span>
+            </div>
+          )}
         </div>
         <button
           onClick={() => setView('form')}
@@ -125,11 +151,22 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
     <div className="space-y-6">
       {/* Team preference */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-2">
-          Team preference
-        </label>
+        <div className="flex items-baseline justify-between mb-2">
+          <label className="block text-sm font-medium text-stone-700">
+            Team preference
+          </label>
+          {teamPref !== '' && (
+            <button
+              type="button"
+              onClick={() => setTeamPref('')}
+              className="text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <div className="flex gap-2">
-          {(['lin', 'ditty', 'none'] as TeamPreference[]).map((opt) => {
+          {(['lin', 'ditty', 'none'] as const).map((opt) => {
             const label = opt === 'lin' ? 'Team Lin' : opt === 'ditty' ? 'Team Ditty' : 'No preference'
             const active =
               opt === 'lin'
@@ -140,7 +177,7 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
             return (
               <button
                 key={opt}
-                onClick={() => setTeamPref(opt)}
+                onClick={() => setTeamPref(teamPref === opt ? '' : opt)}
                 className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
                   teamPref === opt ? active : 'border-stone-300 text-stone-600 hover:border-stone-400'
                 }`}
@@ -197,9 +234,20 @@ export default function PreferenceForm({ existingPreference, nonCaptainUsers, cu
 
       {/* Committee ranking */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">
-          Committee ranking
-        </label>
+        <div className="flex items-baseline justify-between mb-1">
+          <label className="block text-sm font-medium text-stone-700">
+            Committee ranking
+          </label>
+          {ranks.some(Boolean) && (
+            <button
+              type="button"
+              onClick={() => setRanks(['', '', ''])}
+              className="text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <p className="text-xs text-stone-400 mb-3">Rank your top 3 committee preferences.</p>
         <div className="space-y-2">
           {([0, 1, 2] as const).map((idx) => (
