@@ -135,7 +135,7 @@ export function buildFlightMatches(
   return {
     sameFlights: buildSameFlightGroups(legs),
     closeAirportWindows: buildCloseAirportWindows(legs),
-    airportGroups: buildAirportGroups(legs),
+    airportGroups: [],
   }
 }
 
@@ -152,7 +152,7 @@ export function buildPersonalizedFlightMatches(
     currentUserLegs,
     sameFlights: buildPersonalSameFlightGroups(legs, currentUserLegs),
     closeAirportWindows: buildPersonalCloseAirportWindows(legs, currentUserLegs),
-    airportGroups: buildPersonalAirportGroups(legs, currentUserLegs),
+    airportGroups: [],
   }
 }
 
@@ -199,52 +199,20 @@ function buildPersonalSameFlightGroups(legs: FlightLeg[], currentUserLegs: Fligh
     .sort(compareFlightGroups)
 }
 
-function buildAirportGroups(legs: FlightLeg[]): FlightGroup[] {
-  const groups = new Map<string, FlightLeg[]>()
+function buildCloseAirportWindows(legs: FlightLeg[]): FlightGroup[] {
+  const groups = new Map<FlightKind, FlightLeg[]>()
 
   for (const leg of legs) {
-    if (!leg.airport) continue
-    const key = `${leg.kind}:${leg.airport}`
-    groups.set(key, [...(groups.get(key) ?? []), leg])
+    if (leg.minutes === null) continue
+    groups.set(leg.kind, [...(groups.get(leg.kind) ?? []), leg])
   }
 
   return [...groups.entries()]
-    .filter(([, travelers]) => travelers.length > 1)
-    .map(([key, travelers]) => ({
-      key,
-      kind: travelers[0].kind,
-      airport: travelers[0].airport,
+    .map(([kind, travelers]) => ({
+      key: kind,
+      kind,
+      airport: '',
       travelers: sortTravelers(travelers),
-    }))
-    .sort(compareFlightGroups)
-}
-
-function buildPersonalAirportGroups(legs: FlightLeg[], currentUserLegs: FlightLeg[]): FlightGroup[] {
-  return currentUserLegs
-    .filter((currentLeg) => currentLeg.airport)
-    .map((currentLeg) => {
-      const travelers = legs.filter((leg) =>
-        leg.userId !== currentLeg.userId &&
-        leg.kind === currentLeg.kind &&
-        leg.airport === currentLeg.airport
-      )
-
-      return {
-        key: `mine:${currentLeg.kind}:airport:${currentLeg.airport}`,
-        kind: currentLeg.kind,
-        airport: currentLeg.airport,
-        travelers: sortTravelers([currentLeg, ...travelers]),
-      }
-    })
-    .filter((group) => group.travelers.length > 1)
-    .sort(compareFlightGroups)
-}
-
-function buildCloseAirportWindows(legs: FlightLeg[]): FlightGroup[] {
-  return buildAirportGroups(legs)
-    .map((group) => ({
-      ...group,
-      travelers: sortTravelers(group.travelers.filter((leg) => leg.minutes !== null)),
     }))
     .flatMap((group) => {
       const windows: FlightGroup[] = []
@@ -264,7 +232,7 @@ function buildCloseAirportWindows(legs: FlightLeg[]): FlightGroup[] {
           windows.push({
             key: `${group.key}:${base.minutes}`,
             kind: group.kind,
-            airport: group.airport,
+            airport: '',
             travelers,
           })
         }
@@ -277,22 +245,20 @@ function buildCloseAirportWindows(legs: FlightLeg[]): FlightGroup[] {
 
 function buildPersonalCloseAirportWindows(legs: FlightLeg[], currentUserLegs: FlightLeg[]): FlightGroup[] {
   return currentUserLegs
-    .filter((currentLeg) => currentLeg.airport && currentLeg.minutes !== null)
+    .filter((currentLeg) => currentLeg.minutes !== null)
     .map((currentLeg) => {
       const travelers = legs.filter((leg) => {
         if (leg.userId === currentLeg.userId || leg.minutes === null || currentLeg.minutes === null) {
           return false
         }
 
-        return leg.kind === currentLeg.kind &&
-          leg.airport === currentLeg.airport &&
-          Math.abs(leg.minutes - currentLeg.minutes) <= 60
+        return leg.kind === currentLeg.kind && Math.abs(leg.minutes - currentLeg.minutes) <= 60
       })
 
       return {
-        key: `mine:${currentLeg.kind}:window:${currentLeg.airport}:${currentLeg.minutes}`,
+        key: `mine:${currentLeg.kind}:window:${currentLeg.minutes}`,
         kind: currentLeg.kind,
-        airport: currentLeg.airport,
+        airport: '',
         travelers: sortTravelers([currentLeg, ...travelers]),
       }
     })

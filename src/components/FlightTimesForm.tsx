@@ -14,37 +14,23 @@ interface Props {
 
 interface FlightInputProps {
   label: string
-  airport: string
   time: string
   flight: string
-  onAirportChange: (v: string) => void
   onTimeChange: (v: string) => void
   onFlightChange: (v: string) => void
 }
 
 function FlightInput({
   label,
-  airport,
   time,
   flight,
-  onAirportChange,
   onTimeChange,
   onFlightChange,
 }: FlightInputProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</label>
-      <div className="grid grid-cols-1 sm:grid-cols-[0.85fr_1fr_1fr] gap-2">
-        <input
-          type="text"
-          value={airport}
-          onChange={(e) => onAirportChange(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3))}
-          placeholder="SDF"
-          maxLength={3}
-          autoComplete="off"
-          inputMode="text"
-          className="min-w-0 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40 font-mono uppercase"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <input
           type="time"
           value={time}
@@ -66,18 +52,16 @@ function FlightInput({
 export default function FlightTimesForm({ initialArrival, initialDeparture }: Props) {
   const initialArrivalParsed = parseFlightValue(initialArrival)
   const initialDepartureParsed = parseFlightValue(initialDeparture)
-  const [arrivalAirport, setArrivalAirport] = useState(initialArrivalParsed.airport)
   const [arrivalTime, setArrivalTime] = useState(formatTimeInputValue(initialArrivalParsed.time))
   const [arrivalFlight, setArrivalFlight] = useState(initialArrivalParsed.flight)
-  const [departureAirport, setDepartureAirport] = useState(initialDepartureParsed.airport)
   const [departureTime, setDepartureTime] = useState(formatTimeInputValue(initialDepartureParsed.time))
   const [departureFlight, setDepartureFlight] = useState(initialDepartureParsed.flight)
   const [saving, setSaving] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
 
-  const arrivalSummary = combineFlightValue(arrivalAirport, arrivalTime, arrivalFlight)
-  const departureSummary = combineFlightValue(departureAirport, departureTime, departureFlight)
+  const arrivalSummary = combineFlightValue('', arrivalTime, arrivalFlight)
+  const departureSummary = combineFlightValue('', departureTime, departureFlight)
 
   const handleSave = async () => {
     setSaving(true)
@@ -104,19 +88,15 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
     <div className="space-y-4">
       <FlightInput
         label="Friday arrival (Aug 21)"
-        airport={arrivalAirport}
         time={arrivalTime}
         flight={arrivalFlight}
-        onAirportChange={setArrivalAirport}
         onTimeChange={setArrivalTime}
         onFlightChange={setArrivalFlight}
       />
       <FlightInput
         label="Sunday departure (Aug 23)"
-        airport={departureAirport}
         time={departureTime}
         flight={departureFlight}
-        onAirportChange={setDepartureAirport}
         onTimeChange={setDepartureTime}
         onFlightChange={setDepartureFlight}
       />

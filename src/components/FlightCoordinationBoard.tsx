@@ -26,7 +26,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
   const [mode, setMode] = useState<'all' | 'mine'>('all')
   const matches = buildFlightMatches(users)
   const personalizedMatches = buildPersonalizedFlightMatches(users, currentUserId)
-  const incompleteLegs = getFlightLegs(users).filter((leg) => !leg.airport || leg.minutes === null)
+  const incompleteLegs = getFlightLegs(users).filter((leg) => leg.minutes === null)
   const hasAnyFlights = users.some((user) => user.flight_arrival || user.flight_departure)
   const hasPersonalFlight = personalizedMatches.currentUserLegs.length > 0
   const activeMatches = mode === 'mine' ? personalizedMatches : matches
@@ -72,7 +72,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
         <div className="bg-white border border-stone-200 rounded-xl px-5 py-6">
           <p className="text-sm font-medium text-stone-800">Sign in to see personalized matches.</p>
           <p className="text-sm text-stone-500 mt-1">
-            The public groups below still show everyone&apos;s airport coordination.
+            The public groups below still show everyone&apos;s flight coordination.
           </p>
         </div>
       )}
@@ -81,7 +81,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
         <div className="bg-white border border-stone-200 rounded-xl px-5 py-6">
           <p className="text-sm font-medium text-stone-800">Add your flight details to unlock My Matches.</p>
           <p className="text-sm text-stone-500 mt-1">
-            Include an airport code, time, and flight number on your profile.
+            Include your flight times and flight numbers on your profile.
           </p>
         </div>
       )}
@@ -92,7 +92,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
             <div>
               <h2 className="text-sm font-semibold text-amber-900">Needs flight details</h2>
               <p className="text-xs text-amber-700 mt-0.5">
-                Missing airports or times will not appear in airport and one-hour matches.
+                Missing times will not appear in one-hour matches.
               </p>
             </div>
             <span className="text-xs font-medium text-amber-700">{incompleteLegs.length}</span>
@@ -105,9 +105,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
                   <p className="text-xs text-amber-700 capitalize">{leg.kind}</p>
                 </div>
                 <p className="text-xs text-amber-800 text-right">
-                  {!leg.airport && 'Missing airport'}
-                  {!leg.airport && leg.minutes === null && ' · '}
-                  {leg.minutes === null && 'Missing time'}
+                  Missing time
                 </p>
               </div>
             ))}
@@ -123,17 +121,11 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
         showFlight
       />
       <FlightGroupSection
-        title={mode === 'mine' ? 'Near Your Times' : 'One-Hour Airport Windows'}
-        emptyText={mode === 'mine' ? 'No one is within one hour of your airport times yet.' : 'No same-airport times within one hour yet.'}
+        title={mode === 'mine' ? 'Near Your Times' : 'One-Hour Windows'}
+        emptyText={mode === 'mine' ? 'No one is within one hour of your times yet.' : 'No flight times within one hour yet.'}
         groups={activeMatches.closeAirportWindows}
         currentUserId={currentUserId}
         showWindow
-      />
-      <FlightGroupSection
-        title={mode === 'mine' ? 'Your Airports' : 'Airport Groups'}
-        emptyText={mode === 'mine' ? 'No one has the same airports as you yet.' : 'No shared airports yet.'}
-        groups={activeMatches.airportGroups}
-        currentUserId={currentUserId}
       />
     </div>
   )
@@ -203,11 +195,6 @@ function FlightGroupCard({
           <span className="text-xs font-semibold uppercase tracking-wide text-bourbon-amber">
             {KIND_LABEL[group.kind]}
           </span>
-          {group.airport && (
-            <span className="font-mono text-sm bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md">
-              {group.airport}
-            </span>
-          )}
           {showFlight && group.flight && (
             <span className="font-mono text-sm bg-bourbon-amber/10 text-bourbon-rust px-2 py-0.5 rounded-md">
               {group.flight}
