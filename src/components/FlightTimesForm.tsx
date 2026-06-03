@@ -1,52 +1,62 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  combineFlightValue,
+  formatTimeInputValue,
+  parseFlightValue,
+} from '@/utils/flights'
 
 interface Props {
   initialArrival: string
   initialDeparture: string
 }
 
-function parse(value: string): { time: string; flight: string } {
-  if (!value) return { time: '', flight: '' }
-  const parts = value.trim().split(' ')
-  if (parts.length === 1) return { time: parts[0], flight: '' }
-  return { time: parts.slice(0, -1).join(' '), flight: parts[parts.length - 1] }
-}
-
-function combine(time: string, flight: string): string {
-  const t = time.trim()
-  const f = flight.trim()
-  if (!t && !f) return ''
-  return [t, f].filter(Boolean).join(' ')
-}
-
 interface FlightInputProps {
   label: string
+  airport: string
   time: string
   flight: string
+  onAirportChange: (v: string) => void
   onTimeChange: (v: string) => void
   onFlightChange: (v: string) => void
 }
 
-function FlightInput({ label, time, flight, onTimeChange, onFlightChange }: FlightInputProps) {
+function FlightInput({
+  label,
+  airport,
+  time,
+  flight,
+  onAirportChange,
+  onTimeChange,
+  onFlightChange,
+}: FlightInputProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</label>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-[0.85fr_1fr_1fr] gap-2">
         <input
           type="text"
+          value={airport}
+          onChange={(e) => onAirportChange(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3))}
+          placeholder="SDF"
+          maxLength={3}
+          autoComplete="off"
+          inputMode="text"
+          className="min-w-0 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40 font-mono uppercase"
+        />
+        <input
+          type="time"
           value={time}
           onChange={(e) => onTimeChange(e.target.value)}
-          placeholder="1:20pm"
-          className="w-1/2 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40"
+          className="min-w-0 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40"
         />
         <input
           type="text"
           value={flight}
           onChange={(e) => onFlightChange(e.target.value.toUpperCase())}
           placeholder="UA123"
-          className="w-1/2 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40 font-mono"
+          className="min-w-0 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40 font-mono"
         />
       </div>
     </div>
@@ -54,13 +64,20 @@ function FlightInput({ label, time, flight, onTimeChange, onFlightChange }: Flig
 }
 
 export default function FlightTimesForm({ initialArrival, initialDeparture }: Props) {
-  const [arrivalTime, setArrivalTime] = useState(parse(initialArrival).time)
-  const [arrivalFlight, setArrivalFlight] = useState(parse(initialArrival).flight)
-  const [departureTime, setDepartureTime] = useState(parse(initialDeparture).time)
-  const [departureFlight, setDepartureFlight] = useState(parse(initialDeparture).flight)
+  const initialArrivalParsed = parseFlightValue(initialArrival)
+  const initialDepartureParsed = parseFlightValue(initialDeparture)
+  const [arrivalAirport, setArrivalAirport] = useState(initialArrivalParsed.airport)
+  const [arrivalTime, setArrivalTime] = useState(formatTimeInputValue(initialArrivalParsed.time))
+  const [arrivalFlight, setArrivalFlight] = useState(initialArrivalParsed.flight)
+  const [departureAirport, setDepartureAirport] = useState(initialDepartureParsed.airport)
+  const [departureTime, setDepartureTime] = useState(formatTimeInputValue(initialDepartureParsed.time))
+  const [departureFlight, setDepartureFlight] = useState(initialDepartureParsed.flight)
   const [saving, setSaving] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
+
+  const arrivalSummary = combineFlightValue(arrivalAirport, arrivalTime, arrivalFlight)
+  const departureSummary = combineFlightValue(departureAirport, departureTime, departureFlight)
 
   const handleSave = async () => {
     setSaving(true)
@@ -70,8 +87,8 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          flight_arrival: combine(arrivalTime, arrivalFlight),
-          flight_departure: combine(departureTime, departureFlight),
+          flight_arrival: arrivalSummary,
+          flight_departure: departureSummary,
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
@@ -87,15 +104,19 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
     <div className="space-y-4">
       <FlightInput
         label="Friday arrival (Aug 21)"
+        airport={arrivalAirport}
         time={arrivalTime}
         flight={arrivalFlight}
+        onAirportChange={setArrivalAirport}
         onTimeChange={setArrivalTime}
         onFlightChange={setArrivalFlight}
       />
       <FlightInput
         label="Sunday departure (Aug 23)"
+        airport={departureAirport}
         time={departureTime}
         flight={departureFlight}
+        onAirportChange={setDepartureAirport}
         onTimeChange={setDepartureTime}
         onFlightChange={setDepartureFlight}
       />
@@ -121,16 +142,16 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
           >
             <h2 className="font-serif text-xl font-bold text-bourbon-dark">Flight times saved!</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-stone-500">Friday arrival</span>
                 <span className="font-medium text-right">
-                  {combine(arrivalTime, arrivalFlight) || <span className="text-stone-400 italic">Not set</span>}
+                  {arrivalSummary || <span className="text-stone-400 italic">Not set</span>}
                 </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-stone-500">Sunday departure</span>
                 <span className="font-medium text-right">
-                  {combine(departureTime, departureFlight) || <span className="text-stone-400 italic">Not set</span>}
+                  {departureSummary || <span className="text-stone-400 italic">Not set</span>}
                 </span>
               </div>
             </div>

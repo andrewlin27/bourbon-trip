@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { CAPTAIN_EMAILS } from '@/types/index'
 
-const PRIVATE_PATHS = ['/profile', '/admin']
+const PRIVATE_PATHS = ['/profile', '/admin', '/flights']
 
 export async function proxy(request: NextRequest) {
   // Skip auth checks if Supabase isn't configured yet (local dev without env vars)
