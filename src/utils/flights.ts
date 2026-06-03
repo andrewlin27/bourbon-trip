@@ -68,6 +68,19 @@ export function combineFlightValue(airport: string, time: string, flight: string
     .join(' ')
 }
 
+export function formatTimeInputValue(value: string): string {
+  const minutes = parseTimeToMinutes(value)
+  if (minutes === null) return ''
+  const hour = Math.floor(minutes / 60)
+  const minute = minutes % 60
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}
+
+export function formatFlightDisplayTime(value: string): string {
+  const minutes = parseTimeToMinutes(value)
+  return minutes === null ? value : formatMinutes(minutes)
+}
+
 export function parseTimeToMinutes(value: string): number | null {
   const compact = value.trim().toLowerCase().replace(/\s+/g, '')
   if (!compact) return null

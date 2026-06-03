@@ -1,7 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { combineFlightValue, parseFlightValue } from '@/utils/flights'
+import {
+  combineFlightValue,
+  formatTimeInputValue,
+  parseFlightValue,
+} from '@/utils/flights'
 
 interface Props {
   initialArrival: string
@@ -30,20 +34,21 @@ function FlightInput({
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</label>
-      <div className="grid grid-cols-[0.7fr_1fr_1fr] gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-[0.85fr_1fr_1fr] gap-2">
         <input
           type="text"
           value={airport}
-          onChange={(e) => onAirportChange(e.target.value.toUpperCase().slice(0, 3))}
+          onChange={(e) => onAirportChange(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3))}
           placeholder="SDF"
           maxLength={3}
+          autoComplete="off"
+          inputMode="text"
           className="min-w-0 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40 font-mono uppercase"
         />
         <input
-          type="text"
+          type="time"
           value={time}
           onChange={(e) => onTimeChange(e.target.value)}
-          placeholder="1:20pm"
           className="min-w-0 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40"
         />
         <input
@@ -62,10 +67,10 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
   const initialArrivalParsed = parseFlightValue(initialArrival)
   const initialDepartureParsed = parseFlightValue(initialDeparture)
   const [arrivalAirport, setArrivalAirport] = useState(initialArrivalParsed.airport)
-  const [arrivalTime, setArrivalTime] = useState(initialArrivalParsed.time)
+  const [arrivalTime, setArrivalTime] = useState(formatTimeInputValue(initialArrivalParsed.time))
   const [arrivalFlight, setArrivalFlight] = useState(initialArrivalParsed.flight)
   const [departureAirport, setDepartureAirport] = useState(initialDepartureParsed.airport)
-  const [departureTime, setDepartureTime] = useState(initialDepartureParsed.time)
+  const [departureTime, setDepartureTime] = useState(formatTimeInputValue(initialDepartureParsed.time))
   const [departureFlight, setDepartureFlight] = useState(initialDepartureParsed.flight)
   const [saving, setSaving] = useState(false)
   const [showModal, setShowModal] = useState(false)

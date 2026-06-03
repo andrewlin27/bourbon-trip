@@ -8,11 +8,14 @@ import LoginModal from '@/components/LoginModal'
 
 const NAV_LINKS = [
   { href: '/roster', label: 'Roster' },
-  { href: '/flights', label: 'Flights' },
   { href: '/score', label: 'Score' },
   { href: '/power-rankings', label: 'Rankings' },
   { href: '/spin', label: 'Spin' },
   { href: '/help', label: 'Help' },
+]
+
+const PRIVATE_NAV_LINKS = [
+  { href: '/flights', label: 'Flights' },
 ]
 
 export default function Navbar() {
@@ -61,6 +64,7 @@ export default function Navbar() {
       Sign In
     </button>
   )
+  const visibleLinks = loggedIn ? [...NAV_LINKS, ...PRIVATE_NAV_LINKS] : NAV_LINKS
 
   return (
     <>
@@ -76,7 +80,7 @@ export default function Navbar() {
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {NAV_LINKS.map((link) => (
+            {visibleLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -115,7 +119,7 @@ export default function Navbar() {
         {/* Mobile dropdown */}
         {open && (
           <div className="md:hidden border-t border-bourbon-rust/30 px-4 pb-4 flex flex-col gap-3 pt-3 text-sm font-medium">
-            {NAV_LINKS.map((link) => (
+            {visibleLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

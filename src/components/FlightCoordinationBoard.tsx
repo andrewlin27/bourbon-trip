@@ -7,7 +7,9 @@ import {
   buildPersonalizedFlightMatches,
   FlightGroup,
   FlightLeg,
+  formatFlightDisplayTime,
   formatMinutes,
+  getFlightLegs,
 } from '@/utils/flights'
 
 interface Props {
@@ -24,6 +26,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
   const [mode, setMode] = useState<'all' | 'mine'>('all')
   const matches = buildFlightMatches(users)
   const personalizedMatches = buildPersonalizedFlightMatches(users, currentUserId)
+  const incompleteLegs = getFlightLegs(users).filter((leg) => !leg.airport || leg.minutes === null)
   const hasAnyFlights = users.some((user) => user.flight_arrival || user.flight_departure)
   const hasPersonalFlight = personalizedMatches.currentUserLegs.length > 0
   const activeMatches = mode === 'mine' ? personalizedMatches : matches
@@ -81,6 +84,35 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
             Include an airport code, time, and flight number on your profile.
           </p>
         </div>
+      )}
+
+      {mode === 'all' && incompleteLegs.length > 0 && (
+        <section className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-amber-900">Needs flight details</h2>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Missing airports or times will not appear in airport and one-hour matches.
+              </p>
+            </div>
+            <span className="text-xs font-medium text-amber-700">{incompleteLegs.length}</span>
+          </div>
+          <div className="mt-3 divide-y divide-amber-200/70">
+            {incompleteLegs.map((leg) => (
+              <div key={`${leg.userId}:${leg.kind}:missing`} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
+                <div>
+                  <p className="text-sm font-medium text-amber-950">{leg.userName}</p>
+                  <p className="text-xs text-amber-700 capitalize">{leg.kind}</p>
+                </div>
+                <p className="text-xs text-amber-800 text-right">
+                  {!leg.airport && 'Missing airport'}
+                  {!leg.airport && leg.minutes === null && ' · '}
+                  {leg.minutes === null && 'Missing time'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       <FlightGroupSection
@@ -213,7 +245,7 @@ function TravelerRow({ traveler, isCurrentUser }: { traveler: FlightLeg; isCurre
         )}
       </span>
       <span className="flex items-center gap-2 text-xs text-stone-500">
-        {traveler.time && <span>{traveler.time}</span>}
+        {traveler.time && <span>{formatFlightDisplayTime(traveler.time)}</span>}
         {traveler.flight && <span className="font-mono text-stone-400">{traveler.flight}</span>}
       </span>
     </div>
