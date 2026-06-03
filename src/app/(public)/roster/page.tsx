@@ -2,22 +2,25 @@ import { createClientAnonKey } from '@/utils/supabase/server'
 import { UserWithDetails } from '@/types/index'
 import PlayerCard from '@/components/PlayerCard'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export default async function RosterPage() {
   const supabase = await createClientAnonKey()
-  const { data } = await supabase
-    .from('users')
-    .select('*, profiles(*), preference_submissions(submitted_at)')
-    .order('name')
-
-  const { data: settings } = await supabase
-    .from('app_settings')
-    .select('teams_revealed')
-    .single()
+  const [{ data }, { data: settings }, { data: authData }] = await Promise.all([
+    supabase
+      .from('users')
+      .select('*, profiles(*), preference_submissions(submitted_at)')
+      .order('name'),
+    supabase
+      .from('app_settings')
+      .select('teams_revealed')
+      .single(),
+    supabase.auth.getUser(),
+  ])
 
   const users = (data ?? []) as UserWithDetails[]
   const teamsRevealed = settings?.teams_revealed ?? false
+  const showFlightInfo = !!authData.user
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -28,7 +31,12 @@ export default async function RosterPage() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {users.map((user) => (
-          <PlayerCard key={user.id} user={user} teamsRevealed={teamsRevealed} />
+          <PlayerCard
+            key={user.id}
+            user={user}
+            teamsRevealed={teamsRevealed}
+            showFlightInfo={showFlightInfo}
+          />
         ))}
       </div>
     </div>
