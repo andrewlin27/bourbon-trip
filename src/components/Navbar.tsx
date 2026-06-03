@@ -14,8 +14,6 @@ const NAV_LINKS = [
   { href: '/help', label: 'Help' },
 ]
 
-const INSTAGRAM_URL = 'https://www.instagram.com/aceinkentucky/'
-
 export default function Navbar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -96,14 +94,6 @@ export default function Navbar() {
                 Admin
               </Link>
             )}
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-bourbon-gold transition-colors"
-            >
-              Instagram
-            </a>
             {loggedIn && (
               <Link
                 href="/flights"
@@ -153,15 +143,6 @@ export default function Navbar() {
                 Admin
               </Link>
             )}
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => setOpen(false)}
-              className="hover:text-bourbon-gold transition-colors"
-            >
-              Instagram
-            </a>
             {loggedIn && (
               <Link
                 href="/flights"
