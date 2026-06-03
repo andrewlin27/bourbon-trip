@@ -9,15 +9,27 @@ interface CreatedPackage {
   requestee: { id: string; name: string } | { id: string; name: string }[]
 }
 
+interface OutgoingPackage {
+  id: string
+  status: 'pending' | 'accepted' | 'declined'
+  requestee: { id: string; name: string } | { id: string; name: string }[]
+}
+
 interface Props {
   existingPreference: PreferenceSubmission | null
   nonCaptainUsers: { id: string; name: string }[]
   currentUserId: string
   acceptedGroup?: boolean
+  acceptedGroupRequesterName?: string | null
+  outgoingPackages?: OutgoingPackage[]
   onPackagesCreated?: (packages: CreatedPackage[]) => void
 }
 
-export default function TeamPreferenceForm({ existingPreference, nonCaptainUsers, currentUserId, acceptedGroup, onPackagesCreated }: Props) {
+function requesteeName(r: OutgoingPackage['requestee']): string {
+  return Array.isArray(r) ? r.map((x) => x.name).join(', ') : r.name
+}
+
+export default function TeamPreferenceForm({ existingPreference, nonCaptainUsers, currentUserId, acceptedGroup, acceptedGroupRequesterName, outgoingPackages = [], onPackagesCreated }: Props) {
   const [view, setView] = useState<'form' | 'summary'>(existingPreference ? 'summary' : 'form')
   const [teamPref, setTeamPref] = useState<TeamPreference>(existingPreference?.team_preference ?? '')
   const [selectedPartners, setSelectedPartners] = useState<string[]>([])
@@ -81,6 +93,38 @@ export default function TeamPreferenceForm({ existingPreference, nonCaptainUsers
             : <span className="text-stone-400 italic">No preference submitted</span>
           }
         </div>
+        {outgoingPackages.length > 0 ? (
+          <div className="flex justify-between text-sm gap-4">
+            <span className="text-stone-500 shrink-0">Package requests</span>
+            <div className="space-y-0.5 text-right">
+              {outgoingPackages.map((pkg) => {
+                const statusColor =
+                  pkg.status === 'accepted' ? 'text-green-600' :
+                  pkg.status === 'declined' ? 'text-stone-400' :
+                  'text-amber-600'
+                const statusLabel =
+                  pkg.status === 'accepted' ? 'Accepted' :
+                  pkg.status === 'declined' ? 'Declined' :
+                  'Pending'
+                return (
+                  <div key={pkg.id} className="flex gap-3 justify-end">
+                    <span className="font-medium">{requesteeName(pkg.requestee)}</span>
+                    <span className={`font-medium w-14 text-right ${statusColor}`}>{statusLabel}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-between text-sm">
+            <span className="text-stone-500">Package requests</span>
+            {acceptedGroup ? (
+              <span className="font-medium">Joined {acceptedGroupRequesterName ? `${acceptedGroupRequesterName}'s` : 'a'} group</span>
+            ) : (
+              <span className="text-stone-400 italic">None</span>
+            )}
+          </div>
+        )}
         <button onClick={() => setView('form')} className="text-sm text-bourbon-amber underline underline-offset-2">
           Edit
         </button>

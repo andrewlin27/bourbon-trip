@@ -54,7 +54,7 @@ export async function PUT(
       .from('package_requests')
       .delete()
       .eq('requester_id', user.id)
-      .eq('status', 'pending')
+      .in('status', ['pending', 'declined'])
   }
 
   // On accept: override the requestee's team_preference to match requester's

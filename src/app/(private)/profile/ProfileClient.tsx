@@ -47,6 +47,10 @@ export default function ProfileClient({
 }: Props) {
   const [packages, setPackages] = useState(pendingPackages)
   const [acceptedGroup, setAcceptedGroup] = useState(hasAcceptedGroup)
+  const [shownAcceptedGroup, setShownAcceptedGroup] = useState(initialAcceptedGroup)
+  const [acceptedGroupRequesterName, setAcceptedGroupRequesterName] = useState<string | null>(
+    initialAcceptedGroup?.requester.name ?? null
+  )
   const [outgoing, setOutgoing] = useState(outgoingPackages)
   const [confirmRescindId, setConfirmRescindId] = useState<string | null>(null)
   const [rescinding, setRescinding] = useState(false)
@@ -61,11 +65,16 @@ export default function ProfileClient({
   }
 
   const handlePackageRespond = (id: string, status: 'accepted' | 'declined') => {
-    setPackages((prev) => prev.filter((p) => p.id !== id))
     if (status === 'accepted') {
+      const pkg = packages.find((p) => p.id === id)
+      if (pkg) {
+        setAcceptedGroupRequesterName(pkg.requester.name)
+        setShownAcceptedGroup({ requester: pkg.requester, members: pkg.groupMembers })
+      }
       setAcceptedGroup(true)
       setOutgoing([])
     }
+    setPackages((prev) => prev.filter((p) => p.id !== id))
   }
 
   const handlePackagesCreated = (created: OutgoingPackage[]) => {
@@ -113,7 +122,7 @@ export default function ProfileClient({
       {packages.length > 0 && (
         <section className="space-y-3">
           <h2 className="font-semibold text-stone-700 text-sm uppercase tracking-wide">
-            Package Invites
+            Pending Invites
           </h2>
           {packages.map((pkg) => (
             <PackageRequestCard
@@ -128,17 +137,17 @@ export default function ProfileClient({
       )}
 
       {/* Accepted group (group the user joined as a requestee) */}
-      {initialAcceptedGroup && (
+      {shownAcceptedGroup && (
         <section className="space-y-3">
           <h2 className="font-semibold text-stone-700 text-sm uppercase tracking-wide">
             Group You Joined
           </h2>
           <div className="bg-white border border-stone-200 rounded-xl divide-y divide-stone-100">
             <div className="flex items-center justify-between px-4 py-3 gap-3">
-              <span className="text-sm text-stone-800 flex-1">{initialAcceptedGroup.requester.name}</span>
+              <span className="text-sm text-stone-800 flex-1">{shownAcceptedGroup.requester.name}</span>
               <span className="text-xs text-bourbon-amber font-medium">Requester</span>
             </div>
-            {initialAcceptedGroup.members.map((m) => (
+            {shownAcceptedGroup.members.map((m) => (
               <div key={m.id} className="flex items-center justify-between px-4 py-3 gap-3">
                 <span className="text-sm text-stone-800 flex-1">{m.name}</span>
                 <span className={`text-xs font-medium ${m.status === 'accepted' ? 'text-green-600' : 'text-amber-600'}`}>
@@ -222,6 +231,8 @@ export default function ProfileClient({
             nonCaptainUsers={nonCaptains}
             currentUserId={currentUser.id}
             acceptedGroup={acceptedGroup}
+            outgoingPackages={outgoing}
+            acceptedGroupRequesterName={acceptedGroup ? acceptedGroupRequesterName : null}
             onPackagesCreated={handlePackagesCreated}
           />
         </section>
@@ -254,6 +265,9 @@ export default function ProfileClient({
                 existingPreference={existingPreference}
                 nonCaptainUsers={nonCaptains}
                 currentUserId={currentUser.id}
+                acceptedGroup={acceptedGroup}
+                outgoingPackages={outgoing}
+                acceptedGroupRequesterName={acceptedGroup ? acceptedGroupRequesterName : null}
                 onPackagesCreated={handlePackagesCreated}
               />
               <hr className="border-stone-200" />
