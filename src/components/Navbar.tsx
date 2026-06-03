@@ -14,9 +14,7 @@ const NAV_LINKS = [
   { href: '/help', label: 'Help' },
 ]
 
-const PRIVATE_NAV_LINKS = [
-  { href: '/flights', label: 'Flights' },
-]
+const INSTAGRAM_URL = 'https://www.instagram.com/aceinkentucky/'
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -64,7 +62,6 @@ export default function Navbar() {
       Sign In
     </button>
   )
-  const visibleLinks = loggedIn ? [...NAV_LINKS, ...PRIVATE_NAV_LINKS] : NAV_LINKS
 
   return (
     <>
@@ -80,7 +77,7 @@ export default function Navbar() {
 
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {visibleLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -97,6 +94,22 @@ export default function Navbar() {
                 className={`hover:text-bourbon-gold transition-colors ${pathname === '/admin' ? 'text-bourbon-gold' : ''}`}
               >
                 Admin
+              </Link>
+            )}
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-bourbon-gold transition-colors"
+            >
+              Instagram
+            </a>
+            {loggedIn && (
+              <Link
+                href="/flights"
+                className={`hover:text-bourbon-gold transition-colors ${pathname === '/flights' ? 'text-bourbon-gold' : ''}`}
+              >
+                Flights
               </Link>
             )}
             {profileButton}
@@ -119,7 +132,7 @@ export default function Navbar() {
         {/* Mobile dropdown */}
         {open && (
           <div className="md:hidden border-t border-bourbon-rust/30 px-4 pb-4 flex flex-col gap-3 pt-3 text-sm font-medium">
-            {visibleLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -138,6 +151,24 @@ export default function Navbar() {
                 className={`hover:text-bourbon-gold transition-colors ${pathname === '/admin' ? 'text-bourbon-gold' : ''}`}
               >
                 Admin
+              </Link>
+            )}
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpen(false)}
+              className="hover:text-bourbon-gold transition-colors"
+            >
+              Instagram
+            </a>
+            {loggedIn && (
+              <Link
+                href="/flights"
+                onClick={() => setOpen(false)}
+                className={`hover:text-bourbon-gold transition-colors ${pathname === '/flights' ? 'text-bourbon-gold' : ''}`}
+              >
+                Flights
               </Link>
             )}
             <div>{profileButton}</div>
