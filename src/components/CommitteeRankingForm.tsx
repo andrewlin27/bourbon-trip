@@ -81,7 +81,12 @@ export default function CommitteeRankingForm({ existingPreference }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs text-stone-400">Rank your top 3 committee preferences.</p>
+        <p className="text-xs text-stone-400">
+          Rank your top 3 committee preferences.{' '}
+          <a href="/help" className="underline underline-offset-2 hover:text-stone-600">
+            See descriptions on the Help page.
+          </a>
+        </p>
         {ranks.some(Boolean) && (
           <button
             type="button"

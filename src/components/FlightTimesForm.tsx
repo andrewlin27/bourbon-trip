@@ -27,10 +27,9 @@ interface FlightInputProps {
   flight: string
   onTimeChange: (v: string) => void
   onFlightChange: (v: string) => void
-  onAnyChange: () => void
 }
 
-function FlightInput({ label, time, flight, onTimeChange, onFlightChange, onAnyChange }: FlightInputProps) {
+function FlightInput({ label, time, flight, onTimeChange, onFlightChange }: FlightInputProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</label>
@@ -38,14 +37,14 @@ function FlightInput({ label, time, flight, onTimeChange, onFlightChange, onAnyC
         <input
           type="text"
           value={time}
-          onChange={(e) => { onTimeChange(e.target.value); onAnyChange() }}
+          onChange={(e) => onTimeChange(e.target.value)}
           placeholder="1:20pm"
           className="w-1/2 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40"
         />
         <input
           type="text"
           value={flight}
-          onChange={(e) => { onFlightChange(e.target.value.toUpperCase()); onAnyChange() }}
+          onChange={(e) => onFlightChange(e.target.value.toUpperCase())}
           placeholder="UA123"
           className="w-1/2 border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-bourbon-amber/40 font-mono"
         />
@@ -60,12 +59,11 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
   const [departureTime, setDepartureTime] = useState(parse(initialDeparture).time)
   const [departureFlight, setDepartureFlight] = useState(parse(initialDeparture).flight)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
 
   const handleSave = async () => {
     setSaving(true)
-    setSaved(false)
     setError('')
     try {
       const res = await fetch('/api/users/updateUser', {
@@ -77,7 +75,7 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
-      setSaved(true)
+      setShowModal(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
     } finally {
@@ -93,7 +91,6 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
         flight={arrivalFlight}
         onTimeChange={setArrivalTime}
         onFlightChange={setArrivalFlight}
-        onAnyChange={() => setSaved(false)}
       />
       <FlightInput
         label="Sunday departure (Aug 23)"
@@ -101,11 +98,9 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
         flight={departureFlight}
         onTimeChange={setDepartureTime}
         onFlightChange={setDepartureFlight}
-        onAnyChange={() => setSaved(false)}
       />
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      {saved && <p className="text-green-600 text-sm">✓ Saved</p>}
 
       <button
         onClick={handleSave}
@@ -114,6 +109,40 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
       >
         {saving ? 'Saving…' : 'Save flight times'}
       </button>
+
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-serif text-xl font-bold text-bourbon-dark">Flight times saved!</h2>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-stone-500">Friday arrival</span>
+                <span className="font-medium text-right">
+                  {combine(arrivalTime, arrivalFlight) || <span className="text-stone-400 italic">Not set</span>}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-stone-500">Sunday departure</span>
+                <span className="font-medium text-right">
+                  {combine(departureTime, departureFlight) || <span className="text-stone-400 italic">Not set</span>}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowModal(false)}
+              className="w-full bg-bourbon-amber hover:bg-bourbon-rust text-white font-medium py-2.5 rounded-xl text-sm transition-colors"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
