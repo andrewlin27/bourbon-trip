@@ -8,6 +8,7 @@ import LoginModal from '@/components/LoginModal'
 
 const NAV_LINKS = [
   { href: '/roster', label: 'Roster' },
+  { href: '/flights', label: 'Flights' },
   { href: '/score', label: 'Score' },
   { href: '/power-rankings', label: 'Rankings' },
   { href: '/spin', label: 'Spin' },

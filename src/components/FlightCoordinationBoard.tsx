@@ -1,0 +1,221 @@
+'use client'
+
+import { useState } from 'react'
+import { User } from '@/types/index'
+import {
+  buildFlightMatches,
+  buildPersonalizedFlightMatches,
+  FlightGroup,
+  FlightLeg,
+  formatMinutes,
+} from '@/utils/flights'
+
+interface Props {
+  users: Pick<User, 'id' | 'name' | 'flight_arrival' | 'flight_departure'>[]
+  currentUserId: string | null
+}
+
+const KIND_LABEL = {
+  arrival: 'Arrivals',
+  departure: 'Departures',
+} as const
+
+export default function FlightCoordinationBoard({ users, currentUserId }: Props) {
+  const [mode, setMode] = useState<'all' | 'mine'>('all')
+  const matches = buildFlightMatches(users)
+  const personalizedMatches = buildPersonalizedFlightMatches(users, currentUserId)
+  const hasAnyFlights = users.some((user) => user.flight_arrival || user.flight_departure)
+  const hasPersonalFlight = personalizedMatches.currentUserLegs.length > 0
+  const activeMatches = mode === 'mine' ? personalizedMatches : matches
+
+  if (!hasAnyFlights) {
+    return (
+      <div className="bg-white border border-stone-200 rounded-xl px-5 py-8 text-center">
+        <p className="text-stone-400 text-sm">No flights added yet.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      {currentUserId && (
+        <div className="bg-white border border-stone-200 rounded-xl p-1 grid grid-cols-2 gap-1">
+          <button
+            type="button"
+            onClick={() => setMode('all')}
+            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              mode === 'all'
+                ? 'bg-bourbon-dark text-bourbon-cream shadow-sm'
+                : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            All Groups
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('mine')}
+            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              mode === 'mine'
+                ? 'bg-bourbon-dark text-bourbon-cream shadow-sm'
+                : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            My Matches
+          </button>
+        </div>
+      )}
+
+      {mode === 'mine' && !currentUserId && (
+        <div className="bg-white border border-stone-200 rounded-xl px-5 py-6">
+          <p className="text-sm font-medium text-stone-800">Sign in to see personalized matches.</p>
+          <p className="text-sm text-stone-500 mt-1">
+            The public groups below still show everyone&apos;s airport coordination.
+          </p>
+        </div>
+      )}
+
+      {mode === 'mine' && currentUserId && !hasPersonalFlight && (
+        <div className="bg-white border border-stone-200 rounded-xl px-5 py-6">
+          <p className="text-sm font-medium text-stone-800">Add your flight details to unlock My Matches.</p>
+          <p className="text-sm text-stone-500 mt-1">
+            Include an airport code, time, and flight number on your profile.
+          </p>
+        </div>
+      )}
+
+      <FlightGroupSection
+        title={mode === 'mine' ? 'Your Same Flights' : 'Same Flight'}
+        emptyText={mode === 'mine' ? 'No one shares your flight numbers yet.' : 'No shared flight numbers yet.'}
+        groups={activeMatches.sameFlights}
+        currentUserId={currentUserId}
+        showFlight
+      />
+      <FlightGroupSection
+        title={mode === 'mine' ? 'Near Your Times' : 'One-Hour Airport Windows'}
+        emptyText={mode === 'mine' ? 'No one is within one hour of your airport times yet.' : 'No same-airport times within one hour yet.'}
+        groups={activeMatches.closeAirportWindows}
+        currentUserId={currentUserId}
+        showWindow
+      />
+      <FlightGroupSection
+        title={mode === 'mine' ? 'Your Airports' : 'Airport Groups'}
+        emptyText={mode === 'mine' ? 'No one has the same airports as you yet.' : 'No shared airports yet.'}
+        groups={activeMatches.airportGroups}
+        currentUserId={currentUserId}
+      />
+    </div>
+  )
+}
+
+function FlightGroupSection({
+  title,
+  emptyText,
+  groups,
+  currentUserId,
+  showFlight = false,
+  showWindow = false,
+}: {
+  title: string
+  emptyText: string
+  groups: FlightGroup[]
+  currentUserId: string | null
+  showFlight?: boolean
+  showWindow?: boolean
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-end justify-between gap-3">
+        <h2 className="font-serif text-2xl font-bold text-bourbon-dark">{title}</h2>
+        <span className="text-xs text-stone-400">{groups.length}</span>
+      </div>
+      {groups.length === 0 ? (
+        <div className="bg-white border border-stone-200 rounded-xl px-4 py-5">
+          <p className="text-sm text-stone-400">{emptyText}</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {groups.map((group) => (
+            <FlightGroupCard
+              key={group.key}
+              group={group}
+              currentUserId={currentUserId}
+              showFlight={showFlight}
+              showWindow={showWindow}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function FlightGroupCard({
+  group,
+  currentUserId,
+  showFlight,
+  showWindow,
+}: {
+  group: FlightGroup
+  currentUserId: string | null
+  showFlight: boolean
+  showWindow: boolean
+}) {
+  const timedTravelers = group.travelers.filter((leg) => leg.minutes !== null)
+  const firstTime = timedTravelers[0]?.minutes
+  const lastTime = timedTravelers[timedTravelers.length - 1]?.minutes
+
+  return (
+    <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-bourbon-amber">
+            {KIND_LABEL[group.kind]}
+          </span>
+          {group.airport && (
+            <span className="font-mono text-sm bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md">
+              {group.airport}
+            </span>
+          )}
+          {showFlight && group.flight && (
+            <span className="font-mono text-sm bg-bourbon-amber/10 text-bourbon-rust px-2 py-0.5 rounded-md">
+              {group.flight}
+            </span>
+          )}
+        </div>
+        {showWindow && typeof firstTime === 'number' && typeof lastTime === 'number' && (
+          <span className="text-xs text-stone-400">
+            {formatMinutes(firstTime)} - {formatMinutes(lastTime)}
+          </span>
+        )}
+      </div>
+      <div className="divide-y divide-stone-100">
+        {group.travelers.map((traveler) => (
+          <TravelerRow
+            key={`${group.key}:${traveler.userId}:${traveler.flight}`}
+            traveler={traveler}
+            isCurrentUser={traveler.userId === currentUserId}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function TravelerRow({ traveler, isCurrentUser }: { traveler: FlightLeg; isCurrentUser: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
+      <span className="flex items-center gap-2 text-sm font-medium text-stone-800">
+        {traveler.userName}
+        {isCurrentUser && (
+          <span className="text-[10px] uppercase tracking-wide bg-bourbon-amber/10 text-bourbon-rust px-1.5 py-0.5 rounded">
+            You
+          </span>
+        )}
+      </span>
+      <span className="flex items-center gap-2 text-xs text-stone-500">
+        {traveler.time && <span>{traveler.time}</span>}
+        {traveler.flight && <span className="font-mono text-stone-400">{traveler.flight}</span>}
+      </span>
+    </div>
+  )
+}
