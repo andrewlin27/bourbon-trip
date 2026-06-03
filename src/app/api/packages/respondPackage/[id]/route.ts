@@ -30,15 +30,12 @@ export async function PUT(
 
   // Prevent accepting a second group
   if (status === 'accepted') {
-    const { data: alreadyAccepted } = await admin
-      .from('package_requests')
-      .select('id')
-      .eq('requestee_id', user.id)
-      .eq('status', 'accepted')
-      .neq('id', id)
-      .limit(1)
+    const [{ data: incomingAccepted }, { data: outgoingAccepted }] = await Promise.all([
+      admin.from('package_requests').select('id').eq('requestee_id', user.id).eq('status', 'accepted').neq('id', id).limit(1),
+      admin.from('package_requests').select('id').eq('requester_id', user.id).eq('status', 'accepted').limit(1),
+    ])
 
-    if (alreadyAccepted?.length) {
+    if (incomingAccepted?.length || outgoingAccepted?.length) {
       return NextResponse.json({ error: 'You have already accepted a package group' }, { status: 409 })
     }
   }
@@ -51,11 +48,20 @@ export async function PUT(
 
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
+  // On accept: auto-rescind all outgoing pending requests from the acceptee
+  if (status === 'accepted') {
+    await admin
+      .from('package_requests')
+      .delete()
+      .eq('requester_id', user.id)
+      .eq('status', 'pending')
+  }
+
   // On accept: override the requestee's team_preference to match requester's
   if (status === 'accepted') {
     const { data: requesterPref } = await admin
       .from('preference_submissions')
-      .select('team_preference, committee_rank_1, committee_rank_2, committee_rank_3')
+      .select('team_preference')
       .eq('user_id', pkgReq.requester_id)
       .single()
 
@@ -63,11 +69,8 @@ export async function PUT(
       await admin.from('preference_submissions').upsert({
         user_id: user.id,
         team_preference: requesterPref.team_preference,
-        committee_rank_1: requesterPref.committee_rank_1,
-        committee_rank_2: requesterPref.committee_rank_2,
-        committee_rank_3: requesterPref.committee_rank_3,
         updated_at: new Date().toISOString(),
-      })
+      }, { onConflict: 'user_id' })
     }
   }
 

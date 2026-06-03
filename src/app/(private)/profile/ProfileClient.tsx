@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { User, Profile, PreferenceSubmission, PackageRequest } from '@/types/index'
-import PreferenceForm from '@/components/PreferenceForm'
+import TeamPreferenceForm from '@/components/TeamPreferenceForm'
+import CommitteeRankingForm from '@/components/CommitteeRankingForm'
 import PromptAnswerForm from '@/components/PromptAnswerForm'
 import FlightTimesForm from '@/components/FlightTimesForm'
 import PackageRequestCard from '@/components/PackageRequestCard'
@@ -61,7 +62,10 @@ export default function ProfileClient({
 
   const handlePackageRespond = (id: string, status: 'accepted' | 'declined') => {
     setPackages((prev) => prev.filter((p) => p.id !== id))
-    if (status === 'accepted') setAcceptedGroup(true)
+    if (status === 'accepted') {
+      setAcceptedGroup(true)
+      setOutgoing([])
+    }
   }
 
   const handlePackagesCreated = (created: OutgoingPackage[]) => {
@@ -116,7 +120,7 @@ export default function ProfileClient({
               key={pkg.id}
               request={pkg}
               groupMembers={pkg.groupMembers}
-              alreadyInGroup={acceptedGroup}
+              alreadyInGroup={acceptedGroup || outgoing.some((p) => p.status === 'accepted')}
               onRespond={handlePackageRespond}
             />
           ))}
@@ -213,33 +217,47 @@ export default function ProfileClient({
           <p className="text-stone-500 text-sm mb-4">
             These answers are submitted to the captains — only they can see your full submission.
           </p>
-          <PreferenceForm
+          <TeamPreferenceForm
             existingPreference={existingPreference}
             nonCaptainUsers={nonCaptains}
             currentUserId={currentUser.id}
+            acceptedGroup={acceptedGroup}
             onPackagesCreated={handlePackagesCreated}
           />
         </section>
       )}
 
-      {/* Captain preview of the preference form (testing only) */}
+      {/* Committee ranking (non-captains) */}
+      {!currentUser.is_captain && (
+        <section className="bg-white rounded-xl border border-stone-200 p-5">
+          <h2 className="font-semibold text-stone-800 mb-1">Committee Ranking</h2>
+          <p className="text-stone-500 text-sm mb-4">
+            Rank your top 3 committee preferences — only the captains can see this.
+          </p>
+          <CommitteeRankingForm existingPreference={existingPreference} />
+        </section>
+      )}
+
+      {/* Captain preview of the preference forms (testing only) */}
       {currentUser.is_captain && (
         <section className="border border-dashed border-stone-300 rounded-xl p-5">
           <button
             onClick={() => setPreviewForm((v) => !v)}
             className="w-full flex items-center justify-between text-sm text-stone-400 hover:text-stone-600"
           >
-            <span>🔍 Preview preference form <span className="text-xs">(captain testing only)</span></span>
+            <span>🔍 Preview preference forms <span className="text-xs">(captain testing only)</span></span>
             <span>{previewForm ? '▲' : '▼'}</span>
           </button>
           {previewForm && (
-            <div className="mt-4">
-              <PreferenceForm
+            <div className="mt-4 space-y-6">
+              <TeamPreferenceForm
                 existingPreference={existingPreference}
                 nonCaptainUsers={nonCaptains}
                 currentUserId={currentUser.id}
                 onPackagesCreated={handlePackagesCreated}
               />
+              <hr className="border-stone-200" />
+              <CommitteeRankingForm existingPreference={existingPreference} />
             </div>
           )}
         </section>

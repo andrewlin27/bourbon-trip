@@ -69,21 +69,24 @@ export default function PackageRequestCard({ request, groupMembers, alreadyInGro
       {alreadyInGroup ? (
         <p className="text-xs text-stone-400 mt-3 italic">You've already accepted another group request.</p>
       ) : (
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={() => respond('accepted')}
-            disabled={loading !== null}
-            className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg transition-colors"
-          >
-            {loading === 'accepted' ? '…' : 'Accept'}
-          </button>
-          <button
-            onClick={() => respond('declined')}
-            disabled={loading !== null}
-            className="flex-1 bg-white hover:bg-stone-50 disabled:opacity-50 text-stone-600 text-sm font-medium py-2 rounded-lg border border-stone-300 transition-colors"
-          >
-            {loading === 'declined' ? '…' : 'Decline'}
-          </button>
+        <div className="mt-3">
+          <p className="text-xs text-stone-400 mb-2 italic">Accepting is final — neither you nor {request.requester.name} will be able to join another group. Your team preference will be updated to match {request.requester.name}&apos;s, though you can still change it afterward.</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => respond('accepted')}
+              disabled={loading !== null}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+            >
+              {loading === 'accepted' ? '…' : 'Accept'}
+            </button>
+            <button
+              onClick={() => respond('declined')}
+              disabled={loading !== null}
+              className="flex-1 bg-white hover:bg-stone-50 disabled:opacity-50 text-stone-600 text-sm font-medium py-2 rounded-lg border border-stone-300 transition-colors"
+            >
+              {loading === 'declined' ? '…' : 'Decline'}
+            </button>
+          </div>
         </div>
       )}
     </div>

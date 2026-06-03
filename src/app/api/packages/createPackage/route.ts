@@ -12,6 +12,19 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createClientServiceRoleKey()
+
+  // Block if the requester has accepted someone else's incoming invite
+  const { data: incomingAccepted } = await admin
+    .from('package_requests')
+    .select('id')
+    .eq('requestee_id', user.id)
+    .eq('status', 'accepted')
+    .limit(1)
+
+  if (incomingAccepted?.length) {
+    return NextResponse.json({ error: 'You have already joined a group and cannot send new requests' }, { status: 409 })
+  }
+
   const rows = requestee_ids.map((id) => ({
     requester_id: user.id,
     requestee_id: id,
