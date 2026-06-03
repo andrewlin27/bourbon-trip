@@ -21,13 +21,13 @@ export default async function FlightsPage() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-6">
         <p className="text-bourbon-amber text-xs font-semibold uppercase tracking-widest mb-1">
-          Airport Coordination
+          Travel Coordination
         </p>
         <h1 className="font-serif text-3xl font-bold text-bourbon-dark">
           Flight Groups
         </h1>
         <p className="text-stone-400 text-sm mt-1">
-          Same flights, same airports, and one-hour windows.
+          Same flights and nearby arrival or departure times.
         </p>
       </div>
       <FlightCoordinationBoard users={users} currentUserId={currentUserId} />

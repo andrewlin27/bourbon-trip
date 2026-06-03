@@ -215,7 +215,7 @@ export default function ProfileClient({
       <section className="bg-white rounded-xl border border-stone-200 p-5">
         <h2 className="font-semibold text-stone-800 mb-2">Flight Times</h2>
         <p className="text-stone-500 text-sm mb-4">
-          Use the Kentucky-side airport for both legs: where you land Friday, and where you fly out Sunday.
+          Add the time and flight number for your Friday arrival and Sunday departure.
         </p>
         <FlightTimesForm
           initialArrival={currentUser.flight_arrival ?? ''}
