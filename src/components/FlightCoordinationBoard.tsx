@@ -115,6 +115,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
 
       <FlightGroupSection
         title={mode === 'mine' ? 'Your Same Flights' : 'Same Flight'}
+        description="People on the exact same flight number."
         emptyText={mode === 'mine' ? 'No one shares your flight numbers yet.' : 'No shared flight numbers yet.'}
         groups={activeMatches.sameFlights}
         currentUserId={currentUserId}
@@ -122,6 +123,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
       />
       <FlightGroupSection
         title={mode === 'mine' ? 'Near Your Times' : 'One-Hour Windows'}
+        description="People arriving or departing within an hour of each other."
         emptyText={mode === 'mine' ? 'No one is within one hour of your times yet.' : 'No flight times within one hour yet.'}
         groups={activeMatches.closeAirportWindows}
         currentUserId={currentUserId}
@@ -133,6 +135,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
 
 function FlightGroupSection({
   title,
+  description,
   emptyText,
   groups,
   currentUserId,
@@ -140,6 +143,7 @@ function FlightGroupSection({
   showWindow = false,
 }: {
   title: string
+  description?: string
   emptyText: string
   groups: FlightGroup[]
   currentUserId: string | null
@@ -149,8 +153,11 @@ function FlightGroupSection({
   return (
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-3">
-        <h2 className="font-serif text-2xl font-bold text-bourbon-dark">{title}</h2>
-        <span className="text-xs text-stone-400">{groups.length}</span>
+        <div>
+          <h2 className="font-serif text-2xl font-bold text-bourbon-dark">{title}</h2>
+          {description && <p className="text-xs text-stone-400 mt-0.5">{description}</p>}
+        </div>
+        <span className="text-xs text-stone-400 shrink-0">{groups.length}</span>
       </div>
       {groups.length === 0 ? (
         <div className="bg-white border border-stone-200 rounded-xl px-4 py-5">
