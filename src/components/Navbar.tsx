@@ -94,6 +94,14 @@ export default function Navbar() {
                 Admin
               </Link>
             )}
+            {loggedIn && (
+              <Link
+                href="/flights"
+                className={`hover:text-bourbon-gold transition-colors ${pathname === '/flights' ? 'text-bourbon-gold' : ''}`}
+              >
+                Flights
+              </Link>
+            )}
             {profileButton}
           </div>
 
@@ -133,6 +141,15 @@ export default function Navbar() {
                 className={`hover:text-bourbon-gold transition-colors ${pathname === '/admin' ? 'text-bourbon-gold' : ''}`}
               >
                 Admin
+              </Link>
+            )}
+            {loggedIn && (
+              <Link
+                href="/flights"
+                onClick={() => setOpen(false)}
+                className={`hover:text-bourbon-gold transition-colors ${pathname === '/flights' ? 'text-bourbon-gold' : ''}`}
+              >
+                Flights
               </Link>
             )}
             <div>{profileButton}</div>

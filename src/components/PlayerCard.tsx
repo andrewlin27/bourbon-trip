@@ -4,9 +4,10 @@ import Image from 'next/image'
 interface Props {
   user: UserWithDetails
   teamsRevealed: boolean
+  showFlightInfo?: boolean
 }
 
-export default function PlayerCard({ user, teamsRevealed }: Props) {
+export default function PlayerCard({ user, teamsRevealed, showFlightInfo = false }: Props) {
   const submitted = !!user.preference_submissions
   const profile = user.profiles
 
@@ -74,7 +75,7 @@ export default function PlayerCard({ user, teamsRevealed }: Props) {
         </div>
 
         {/* Flight times */}
-        {(user.flight_arrival || user.flight_departure) && (
+        {showFlightInfo && (user.flight_arrival || user.flight_departure) && (
           <div className="text-xs text-stone-500 space-y-0.5 border-t border-stone-100 pt-3">
             {user.flight_arrival && (
               <p>✈ <span className="font-medium">Arrives</span> {user.flight_arrival}</p>

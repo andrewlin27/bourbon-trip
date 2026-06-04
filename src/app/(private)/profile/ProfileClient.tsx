@@ -108,14 +108,24 @@ export default function ProfileClient({
   return (
     <div className="max-w-lg mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div>
-        <p className="text-bourbon-amber text-xs font-semibold uppercase tracking-widest mb-1">
-          My Profile
-        </p>
-        <h1 className="font-serif text-3xl font-bold text-bourbon-dark">
-          {currentUser.name}
-        </h1>
-        <p className="text-stone-400 text-sm mt-0.5">{currentUser.email}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-bourbon-amber text-xs font-semibold uppercase tracking-widest mb-1">
+            My Profile
+          </p>
+          <h1 className="font-serif text-3xl font-bold text-bourbon-dark leading-tight">
+            {currentUser.name}
+          </h1>
+          <p className="text-stone-400 text-sm mt-0.5 break-words">{currentUser.email}</p>
+        </div>
+        <form action="/api/auth/signout" method="POST" className="shrink-0 pt-1">
+          <button
+            type="submit"
+            className="border border-stone-300 text-stone-500 hover:text-stone-700 hover:bg-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Sign out
+          </button>
+        </form>
       </div>
 
       {/* Pending package invites */}
@@ -203,7 +213,10 @@ export default function ProfileClient({
 
       {/* Flight times */}
       <section className="bg-white rounded-xl border border-stone-200 p-5">
-        <h2 className="font-semibold text-stone-800 mb-4">Flight Times</h2>
+        <h2 className="font-semibold text-stone-800 mb-2">Flight Times</h2>
+        <p className="text-stone-500 text-sm mb-4">
+          Add the time and flight number for your Friday arrival and Sunday departure.
+        </p>
         <FlightTimesForm
           initialArrival={currentUser.flight_arrival ?? ''}
           initialDeparture={currentUser.flight_departure ?? ''}
@@ -276,18 +289,6 @@ export default function ProfileClient({
           )}
         </section>
       )}
-
-      {/* Sign out */}
-      <div className="pt-2">
-        <form action="/api/auth/signout" method="POST">
-          <button
-            type="submit"
-            className="text-sm text-stone-400 hover:text-stone-600 underline underline-offset-2"
-          >
-            Sign out
-          </button>
-        </form>
-      </div>
 
       {/* Rescind confirmation modal */}
       {confirmRescindId && (() => {
