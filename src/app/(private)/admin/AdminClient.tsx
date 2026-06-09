@@ -178,8 +178,8 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
                   <div className="flex justify-between items-start">
                     <span className="font-semibold text-stone-800">{p.users.name}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      p.team_preference === 'lin' ? 'bg-blue-100 text-blue-700'
-                      : p.team_preference === 'ditty' ? 'bg-red-100 text-red-700'
+                      p.team_preference === 'lin' ? 'bg-red-100 text-red-700'
+                      : p.team_preference === 'ditty' ? 'bg-blue-100 text-blue-700'
                       : p.team_preference === 'none' ? 'bg-stone-100 text-stone-500'
                       : 'bg-yellow-50 text-yellow-600'
                     }`}>
