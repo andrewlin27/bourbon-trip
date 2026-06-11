@@ -28,6 +28,15 @@ export const COMMITTEE_SHORT_NAMES: Record<CommitteeRole, string> = {
   'Navigation & Crowd Control': 'Navigation',
 }
 
+export const COMMITTEE_TARGETS: Record<CommitteeRole, number> = {
+  'Team Lead': 2,
+  'Food': 3,
+  'Media': 3,
+  'Venmo Logging': 2,
+  'Uber/Lyft': 3,
+  'Navigation & Crowd Control': 3,
+}
+
 export const PROMPT_BANK = [
   'Favorite bourbon',
   'Nickname',
