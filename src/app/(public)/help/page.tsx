@@ -93,6 +93,14 @@ export default function HelpPage() {
                 </span>
               </li>
             ))}
+            <li className="flex gap-2 list-none">
+              <span className="text-bourbon-amber font-semibold shrink-0">·</span>
+              <span>
+                <span className="font-semibold text-stone-800">Rookie of the Year</span>
+                {' — Most improved non-bourbon enthusiast. '}
+                <span className="text-stone-500">Eligible: Brandon Turnage, Eric McGonagle, Jess Holbert, Joseph Valenta, Juan Nerio, Juan Ardila, Kyle Dessens, Lucas Giammona, Nafi Islam, Nick Caso, Scott Trouy.</span>
+              </span>
+            </li>
           </ul>
         </section>
 
