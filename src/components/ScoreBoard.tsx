@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Spinner from './Spinner'
 
 interface Props {
   initialLin: number
@@ -115,7 +116,7 @@ export default function ScoreBoard({ initialLin, initialDitty, canIncrement }: P
             disabled={!hasPending || saving}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
           >
-            {saving ? 'Saving…' : 'Save changes'}
+            {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save changes'}
           </button>
         </div>
       )}

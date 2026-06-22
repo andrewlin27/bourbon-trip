@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { PreferenceSubmission, TeamPreference } from '@/types/index'
+import Spinner from './Spinner'
 
 interface CreatedPackage {
   id: string
@@ -244,7 +245,7 @@ export default function TeamPreferenceForm({ existingPreference, nonCaptainUsers
             disabled={saving}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
           >
-            {saving ? 'Saving…' : existingPreference ? 'Update' : 'Submit'}
+            {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : existingPreference ? 'Update' : 'Submit'}
           </button>
         </div>
       )}

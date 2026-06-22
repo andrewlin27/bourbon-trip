@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AppSettings, COMMITTEE_ROLES, COMMITTEE_SHORT_NAMES, COMMITTEE_TARGETS } from '@/types/index'
+import Spinner from '@/components/Spinner'
 
 interface Preference {
   user_id: string
@@ -276,7 +277,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
             disabled={saving}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl text-sm transition-colors"
           >
-            {saving ? 'Saving…' : 'Save rankings'}
+            {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save rankings'}
           </button>
         </div>
       )}
@@ -401,7 +402,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
             disabled={savingTeams}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl text-sm transition-colors"
           >
-            {savingTeams ? 'Saving…' : 'Save team assignments'}
+            {savingTeams ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save team assignments'}
           </button>
         </div>
       )}
@@ -430,7 +431,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
                   ? 'bg-stone-100 text-stone-400 border-stone-200'
                   : 'bg-white text-bourbon-amber border-bourbon-amber hover:bg-bourbon-cream'
               }`}>
-                {uploadingId === u.id ? 'Uploading…' : avatarUrls[u.id] ? 'Replace' : 'Upload'}
+                {uploadingId === u.id ? <span className="flex items-center justify-center gap-1.5"><Spinner className="w-3.5 h-3.5" />Uploading…</span> : avatarUrls[u.id] ? 'Replace' : 'Upload'}
                 <input
                   type="file"
                   accept="image/*"
