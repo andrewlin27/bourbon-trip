@@ -260,15 +260,84 @@ function FlightGroupCard({
           </span>
         )}
       </div>
-      <div className="divide-y divide-stone-100">
-        {group.travelers.map((traveler) => (
-          <TravelerRow
-            key={`${group.key}:${traveler.userId}:${traveler.flight}`}
-            traveler={traveler}
-            isCurrentUser={traveler.userId === currentUserId}
-          />
-        ))}
-      </div>
+      {showWindow ? (
+        <div className="divide-y divide-stone-100">
+          {getNearbyDisplayRows(group.travelers).map((row) =>
+            row.travelers.length > 1 ? (
+              <FlightClusterRow
+                key={`${group.key}:${row.identity}`}
+                travelers={row.travelers}
+                currentUserId={currentUserId}
+              />
+            ) : (
+              <TravelerRow
+                key={`${group.key}:${row.travelers[0].userId}:${row.travelers[0].flight}`}
+                traveler={row.travelers[0]}
+                isCurrentUser={row.travelers[0].userId === currentUserId}
+              />
+            )
+          )}
+        </div>
+      ) : (
+        <div className="divide-y divide-stone-100">
+          {group.travelers.map((traveler) => (
+            <TravelerRow
+              key={`${group.key}:${traveler.userId}:${traveler.flight}`}
+              traveler={traveler}
+              isCurrentUser={traveler.userId === currentUserId}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function getNearbyDisplayRows(travelers: FlightLeg[]) {
+  const groups = new Map<string, FlightLeg[]>()
+
+  for (const traveler of travelers) {
+    const identity = traveler.flight || traveler.userId
+    groups.set(identity, [...(groups.get(identity) ?? []), traveler])
+  }
+
+  return [...groups.entries()].map(([identity, groupedTravelers]) => ({
+    identity,
+    travelers: groupedTravelers,
+  }))
+}
+
+function FlightClusterRow({
+  travelers,
+  currentUserId,
+}: {
+  travelers: FlightLeg[]
+  currentUserId: string | null
+}) {
+  const firstTraveler = travelers[0]
+  const includesCurrentUser = travelers.some((traveler) => traveler.userId === currentUserId)
+  const names = travelers.map((traveler) => traveler.userName).join(', ')
+
+  return (
+    <div className="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0">
+      <span className="min-w-0 text-sm font-medium text-stone-800">
+        <span className="flex flex-wrap items-center gap-2">
+          <span>{firstTraveler.flight} group</span>
+          <span className="text-xs font-normal text-stone-400">
+            {travelers.length} {pluralize(travelers.length, 'traveler')}
+          </span>
+          {includesCurrentUser && (
+            <span className="text-[10px] uppercase tracking-wide bg-bourbon-amber/10 text-bourbon-rust px-1.5 py-0.5 rounded">
+              You
+            </span>
+          )}
+        </span>
+        <span className="mt-0.5 block truncate text-xs font-normal text-stone-400">{names}</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-2 text-xs text-stone-500">
+        {firstTraveler.time && <span>{formatFlightDisplayTime(firstTraveler.time)}</span>}
+        {firstTraveler.flight && <span className="font-mono text-stone-400">{firstTraveler.flight}</span>}
+      </span>
     </div>
   )
 }
