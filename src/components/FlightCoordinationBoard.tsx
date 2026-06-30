@@ -27,6 +27,8 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
   const matches = buildFlightMatches(users)
   const personalizedMatches = buildPersonalizedFlightMatches(users, currentUserId)
   const incompleteLegs = getFlightLegs(users).filter((leg) => leg.minutes === null || !leg.flight)
+  const incompleteUsers = new Set(incompleteLegs.map((leg) => leg.userId)).size
+  const usersWithFlightInfo = users.filter((user) => user.flight_arrival || user.flight_departure).length
   const hasAnyFlights = users.some((user) => user.flight_arrival || user.flight_departure)
   const hasPersonalFlight = personalizedMatches.currentUserLegs.length > 0
   const activeMatches = mode === 'mine' ? personalizedMatches : matches
@@ -41,6 +43,24 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
 
   return (
     <div className="space-y-8">
+      <section className="grid gap-3 sm:grid-cols-3">
+        <FlightSummaryStat
+          label="Travelers with flight info"
+          value={usersWithFlightInfo}
+          helper={`${usersWithFlightInfo} ${pluralize(usersWithFlightInfo, 'person', 'people')} entered arrival or departure details`}
+        />
+        <FlightSummaryStat
+          label="Exact-flight groups"
+          value={matches.sameFlights.length}
+          helper="Same flight number and direction"
+        />
+        <FlightSummaryStat
+          label="Nearby-time groups"
+          value={matches.closeAirportWindows.length}
+          helper="Different flights within one hour"
+        />
+      </section>
+
       {currentUserId && (
         <div className="bg-white border border-stone-200 rounded-xl p-1 grid grid-cols-2 gap-1">
           <button
@@ -95,7 +115,9 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
                 Missing times cannot appear in nearby-time matches. Missing flight numbers cannot appear in exact-flight matches.
               </p>
             </div>
-            <span className="text-xs font-medium text-amber-700">{incompleteLegs.length}</span>
+            <span className="text-xs font-medium text-amber-700">
+              {incompleteUsers} {pluralize(incompleteUsers, 'person', 'people')}
+            </span>
           </div>
           <div className="mt-3 divide-y divide-amber-200/70">
             {incompleteLegs.map((leg) => (
@@ -131,6 +153,24 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
         description="People on different flights arriving or departing within an hour of each other."
         showWindow
       />
+    </div>
+  )
+}
+
+function FlightSummaryStat({
+  label,
+  value,
+  helper,
+}: {
+  label: string
+  value: number
+  helper: string
+}) {
+  return (
+    <div className="bg-white border border-stone-200 rounded-xl px-4 py-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-stone-400">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-bourbon-dark">{value}</p>
+      <p className="mt-1 text-xs text-stone-500">{helper}</p>
     </div>
   )
 }
@@ -180,6 +220,10 @@ function FlightGroupSection({
       )}
     </section>
   )
+}
+
+function pluralize(count: number, singular: string, plural = `${singular}s`) {
+  return count === 1 ? singular : plural
 }
 
 function FlightGroupCard({
