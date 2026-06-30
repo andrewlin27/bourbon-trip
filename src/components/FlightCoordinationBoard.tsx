@@ -322,7 +322,7 @@ function FlightClusterRow({
     <div className="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0">
       <span className="min-w-0 text-sm font-medium text-stone-800">
         <span className="flex flex-wrap items-center gap-2">
-          <span>{firstTraveler.flight} group</span>
+          <span>{firstTraveler.flight} Group</span>
           <span className="text-xs font-normal text-stone-400">
             {travelers.length} {pluralize(travelers.length, 'traveler')}
           </span>
