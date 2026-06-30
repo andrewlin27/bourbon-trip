@@ -226,7 +226,7 @@ function buildCloseAirportWindows(legs: FlightLeg[]): FlightGroup[] {
           return Math.abs(leg.minutes - base.minutes!) <= 60
         })
 
-        if (travelers.length > 1) {
+        if (travelers.length > 1 && hasMultipleFlightIdentities(travelers)) {
           travelers.forEach((leg) => used.add(leg.userId))
           windows.push({
             key: `${group.key}:${base.minutes}`,
@@ -251,7 +251,9 @@ function buildPersonalCloseAirportWindows(legs: FlightLeg[], currentUserLegs: Fl
           return false
         }
 
-        return leg.kind === currentLeg.kind && Math.abs(leg.minutes - currentLeg.minutes) <= 60
+        return leg.kind === currentLeg.kind &&
+          !isSameFlight(leg, currentLeg) &&
+          Math.abs(leg.minutes - currentLeg.minutes) <= 60
       })
 
       return {
@@ -285,6 +287,18 @@ function compareKind(a: FlightKind, b: FlightKind): number {
 
 function getGroupStartMinutes(group: FlightGroup): number {
   return group.travelers.find((traveler) => traveler.minutes !== null)?.minutes ?? Number.MAX_SAFE_INTEGER
+}
+
+function hasMultipleFlightIdentities(travelers: FlightLeg[]): boolean {
+  return new Set(travelers.map(getFlightIdentity)).size > 1
+}
+
+function isSameFlight(a: FlightLeg, b: FlightLeg): boolean {
+  return !!a.flight && !!b.flight && a.flight === b.flight
+}
+
+function getFlightIdentity(traveler: FlightLeg): string {
+  return traveler.flight || `missing-flight:${traveler.userId}`
 }
 
 function sortTravelers(travelers: FlightLeg[]): FlightLeg[] {

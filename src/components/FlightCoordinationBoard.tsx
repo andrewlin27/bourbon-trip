@@ -128,7 +128,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
         emptyText={mode === 'mine' ? 'No one is within one hour of your times yet.' : 'No flight times within one hour yet.'}
         groups={activeMatches.closeAirportWindows}
         currentUserId={currentUserId}
-        description="People arriving or departing within an hour of each other."
+        description="People on different flights arriving or departing within an hour of each other."
         showWindow
       />
     </div>
