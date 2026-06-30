@@ -17,9 +17,15 @@ export default function PlayerCard({ user, teamsRevealed, showFlightInfo = false
       : user.team === 'ditty'
       ? 'bg-team-ditty text-white'
       : ''
+  const teamAccent =
+    teamsRevealed && user.team === 'lin'
+      ? 'border-t-team-lin'
+      : teamsRevealed && user.team === 'ditty'
+      ? 'border-t-team-ditty'
+      : 'border-t-transparent'
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+    <div className={`bg-white rounded-2xl border border-t-4 border-stone-200 ${teamAccent} shadow-sm overflow-hidden`}>
       {/* Portrait photo — 3:4 aspect ratio for iPhone vertical shots */}
       <div className="relative w-full" style={{ aspectRatio: '3/4' }}>
         {user.avatar_url ? (
