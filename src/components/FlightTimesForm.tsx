@@ -6,6 +6,7 @@ import {
   formatTimeInputValue,
   parseFlightValue,
 } from '@/utils/flights'
+import Spinner from './Spinner'
 
 interface Props {
   initialArrival: string
@@ -108,7 +109,7 @@ export default function FlightTimesForm({ initialArrival, initialDeparture }: Pr
         disabled={saving}
         className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
       >
-        {saving ? 'Saving…' : 'Save flight times'}
+        {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save flight times'}
       </button>
 
       {showModal && (

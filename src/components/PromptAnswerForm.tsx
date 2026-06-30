@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Profile, PROMPT_BANK, PromptQuestion } from '@/types/index'
+import Spinner from './Spinner'
 
 interface Props {
   initialProfile: Profile | null
@@ -97,7 +98,7 @@ export default function PromptAnswerForm({ initialProfile }: Props) {
         disabled={!valid || saving}
         className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl transition-colors text-sm"
       >
-        {saving ? 'Saving…' : 'Save prompts'}
+        {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save prompts'}
       </button>
 
       {showModal && (

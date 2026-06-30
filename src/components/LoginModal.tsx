@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Spinner from './Spinner'
 
 interface Props {
   onClose: () => void
@@ -92,7 +93,7 @@ export default function LoginModal({ onClose }: Props) {
                 disabled={loading}
                 className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
               >
-                {loading ? 'Sending…' : 'Send magic link'}
+                {loading ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Sending…</span> : 'Send magic link'}
               </button>
             </form>
           </>

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { AppSettings, COMMITTEE_ROLES } from '@/types/index'
+import { AppSettings, COMMITTEE_ROLES, COMMITTEE_SHORT_NAMES, COMMITTEE_TARGETS } from '@/types/index'
+import Spinner from '@/components/Spinner'
 
 interface Preference {
   user_id: string
@@ -178,8 +179,8 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
                   <div className="flex justify-between items-start">
                     <span className="font-semibold text-stone-800">{p.users.name}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      p.team_preference === 'lin' ? 'bg-blue-100 text-blue-700'
-                      : p.team_preference === 'ditty' ? 'bg-red-100 text-red-700'
+                      p.team_preference === 'lin' ? 'bg-red-100 text-red-700'
+                      : p.team_preference === 'ditty' ? 'bg-blue-100 text-blue-700'
                       : p.team_preference === 'none' ? 'bg-stone-100 text-stone-500'
                       : 'bg-yellow-50 text-yellow-600'
                     }`}>
@@ -276,7 +277,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
             disabled={saving}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl text-sm transition-colors"
           >
-            {saving ? 'Saving…' : 'Save rankings'}
+            {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save rankings'}
           </button>
         </div>
       )}
@@ -301,20 +302,84 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
           {/* Team + committee assignment */}
           <div>
             <p className="text-sm font-medium text-stone-700 mb-3">Assign teams &amp; committees</p>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              {(['lin', 'ditty'] as const).map((team) => {
+                const members = allUsers.filter((u) => !u.is_captain && teamAssignments[u.id] === team)
+                const over = members.length > 8
+                const full = members.length === 8
+                return (
+                  <div key={team} className={`rounded-xl border px-3 py-2 space-y-1.5 ${over ? 'bg-red-50 border-red-200' : full ? 'bg-green-50 border-green-200' : members.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-xs font-semibold ${over ? 'text-red-700' : full ? 'text-green-700' : members.length > 0 ? 'text-amber-800' : 'text-stone-400'}`}>
+                        {team === 'lin' ? 'Team Lin' : 'Team Ditty'}
+                      </span>
+                      <span className={`text-xs font-medium ${over ? 'text-red-600' : full ? 'text-green-600' : members.length > 0 ? 'text-amber-700' : 'text-stone-400'}`}>
+                        {members.length}/8
+                      </span>
+                    </div>
+                    {members.length > 0 ? (
+                      <ul className="space-y-0.5">
+                        {members.map((u) => (
+                          <li key={u.id} className="text-xs text-stone-700 truncate">{u.name}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-stone-400 italic">None yet</p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {COMMITTEE_ROLES.map((r) => {
+                const members = allUsers.filter((u) => committeeAssignments[u.id] === r)
+                const target = COMMITTEE_TARGETS[r]
+                const over = members.length > target
+                const full = members.length === target
+                return (
+                  <div key={r} className={`rounded-xl border px-3 py-2 space-y-1.5 ${over ? 'bg-red-50 border-red-200' : full ? 'bg-green-50 border-green-200' : members.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-stone-50 border-stone-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-xs font-semibold ${over ? 'text-red-700' : full ? 'text-green-700' : members.length > 0 ? 'text-amber-800' : 'text-stone-400'}`}>
+                        {COMMITTEE_SHORT_NAMES[r]}
+                      </span>
+                      <span className={`text-xs font-medium ${over ? 'text-red-600' : full ? 'text-green-600' : members.length > 0 ? 'text-amber-700' : 'text-stone-400'}`}>
+                        {members.length}/{target}
+                      </span>
+                    </div>
+                    {members.length > 0 ? (
+                      <ul className="space-y-0.5">
+                        {members.map((u) => (
+                          <li key={u.id} className="text-xs text-stone-700 truncate">{u.name}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-stone-400 italic">None yet</p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
             <div className="space-y-1.5">
               {allUsers.filter((u) => !u.is_captain).map((u) => (
                 <div key={u.id} className="bg-white border border-stone-200 rounded-xl px-3 py-2 space-y-1.5">
                   <span className="block text-sm font-medium text-stone-800">{u.name}</span>
-                  <div className="grid grid-cols-2 gap-2">
-                  <select
-                    value={teamAssignments[u.id] ?? ''}
-                    onChange={(e) => setTeamAssignments((prev) => ({ ...prev, [u.id]: e.target.value }))}
-                    className="w-full border border-stone-300 rounded-lg px-2 py-1 text-xs focus:outline-none bg-white"
-                  >
-                    <option value="">No team</option>
-                    <option value="lin">Team Lin</option>
-                    <option value="ditty">Team Ditty</option>
-                  </select>
+                  <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-1">
+                    {[
+                      { value: '', label: 'None', active: 'bg-stone-700 text-white border-stone-700', inactive: 'border-stone-200 text-stone-400' },
+                      { value: 'lin', label: 'Team Lin', active: 'bg-team-lin text-white border-team-lin', inactive: 'border-stone-200 text-stone-500' },
+                      { value: 'ditty', label: 'Team Ditty', active: 'bg-team-ditty text-white border-team-ditty', inactive: 'border-stone-200 text-stone-500' },
+                    ].map(({ value, label, active, inactive }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setTeamAssignments((prev) => ({ ...prev, [u.id]: value }))}
+                        className={`border rounded-lg px-1.5 py-1 text-xs font-medium transition-colors ${(teamAssignments[u.id] ?? '') === value ? active : inactive}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                   <select
                     value={committeeAssignments[u.id] ?? ''}
                     onChange={(e) => setCommitteeAssignments((prev) => ({ ...prev, [u.id]: e.target.value }))}
@@ -337,7 +402,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
             disabled={savingTeams}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-medium py-2.5 rounded-xl text-sm transition-colors"
           >
-            {savingTeams ? 'Saving…' : 'Save team assignments'}
+            {savingTeams ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save team assignments'}
           </button>
         </div>
       )}
@@ -366,7 +431,7 @@ export default function AdminClient({ preferences, packageRequests, rankings, al
                   ? 'bg-stone-100 text-stone-400 border-stone-200'
                   : 'bg-white text-bourbon-amber border-bourbon-amber hover:bg-bourbon-cream'
               }`}>
-                {uploadingId === u.id ? 'Uploading…' : avatarUrls[u.id] ? 'Replace' : 'Upload'}
+                {uploadingId === u.id ? <span className="flex items-center justify-center gap-1.5"><Spinner className="w-3.5 h-3.5" />Uploading…</span> : avatarUrls[u.id] ? 'Replace' : 'Upload'}
                 <input
                   type="file"
                   accept="image/*"

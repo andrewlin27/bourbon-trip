@@ -177,18 +177,18 @@ function FlightSummaryStat({
 
 function FlightGroupSection({
   title,
+  description,
   emptyText,
   groups,
   currentUserId,
-  description,
   showFlight = false,
   showWindow = false,
 }: {
   title: string
+  description?: string
   emptyText: string
   groups: FlightGroup[]
   currentUserId: string | null
-  description?: string
   showFlight?: boolean
   showWindow?: boolean
 }) {
@@ -199,7 +199,7 @@ function FlightGroupSection({
           <h2 className="font-serif text-2xl font-bold text-bourbon-dark">{title}</h2>
           {description && <p className="text-xs text-stone-400 mt-0.5">{description}</p>}
         </div>
-        <span className="text-xs text-stone-400">{groups.length}</span>
+        <span className="text-xs text-stone-400 shrink-0">{groups.length}</span>
       </div>
       {groups.length === 0 ? (
         <div className="bg-white border border-stone-200 rounded-xl px-4 py-5">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Spinner from './Spinner'
 
 interface Props {
   initialLin: number
@@ -86,12 +87,12 @@ export default function ScoreBoard({ initialLin, initialDitty, canIncrement }: P
     <div className="space-y-6">
       {/* Scoreboard */}
       <div className="grid grid-cols-2 gap-4">
-        <div className={`rounded-2xl p-6 text-center space-y-1 border-2 transition-colors ${leading === 'lin' ? 'border-team-lin bg-blue-50' : 'border-stone-200 bg-white'}`}>
+        <div className={`rounded-2xl p-6 text-center space-y-1 border-2 transition-colors ${leading === 'lin' ? 'border-team-lin bg-red-50' : 'border-stone-200 bg-white'}`}>
           <p className="text-xs font-semibold uppercase tracking-widest text-team-lin">Team Lin</p>
           <p className="font-serif text-6xl font-bold text-stone-900 tabular-nums">{lin}</p>
           {leading === 'lin' && <p className="text-xs text-team-lin font-medium">Leading</p>}
         </div>
-        <div className={`rounded-2xl p-6 text-center space-y-1 border-2 transition-colors ${leading === 'ditty' ? 'border-team-ditty bg-red-50' : 'border-stone-200 bg-white'}`}>
+        <div className={`rounded-2xl p-6 text-center space-y-1 border-2 transition-colors ${leading === 'ditty' ? 'border-team-ditty bg-blue-50' : 'border-stone-200 bg-white'}`}>
           <p className="text-xs font-semibold uppercase tracking-widest text-team-ditty">Team Ditty</p>
           <p className="font-serif text-6xl font-bold text-stone-900 tabular-nums">{ditty}</p>
           {leading === 'ditty' && <p className="text-xs text-team-ditty font-medium">Leading</p>}
@@ -115,7 +116,7 @@ export default function ScoreBoard({ initialLin, initialDitty, canIncrement }: P
             disabled={!hasPending || saving}
             className="w-full bg-bourbon-amber hover:bg-bourbon-rust disabled:opacity-40 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
           >
-            {saving ? 'Saving…' : 'Save changes'}
+            {saving ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />Saving…</span> : 'Save changes'}
           </button>
         </div>
       )}

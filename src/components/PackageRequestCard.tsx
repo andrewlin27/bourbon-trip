@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { PackageRequest } from '@/types/index'
+import Spinner from './Spinner'
 
 interface Props {
   request: PackageRequest & { requester: { id: string; name: string } }
@@ -79,7 +80,7 @@ export default function PackageRequestCard({ request, groupMembers, alreadyInGro
               disabled={loading !== null}
               className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg transition-colors"
             >
-              {loading === 'accepted' ? '…' : 'Accept'}
+              {loading === 'accepted' ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />…</span> : 'Accept'}
             </button>
           )}
           <button
@@ -87,7 +88,7 @@ export default function PackageRequestCard({ request, groupMembers, alreadyInGro
             disabled={loading !== null}
             className="flex-1 bg-white hover:bg-stone-50 disabled:opacity-50 text-stone-600 text-sm font-medium py-2 rounded-lg border border-stone-300 transition-colors"
           >
-            {loading === 'declined' ? '…' : 'Decline'}
+            {loading === 'declined' ? <span className="flex items-center justify-center gap-2"><Spinner className="w-4 h-4" />…</span> : 'Decline'}
           </button>
         </div>
       </div>
