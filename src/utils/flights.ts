@@ -34,7 +34,6 @@ export interface PersonalizedFlightMatches extends FlightMatches {
 }
 
 const AIRPORT_RE = /^[A-Z]{3}$/
-const FLIGHT_RE = /^[A-Z0-9]{2,4}\d{1,4}[A-Z]?$/i
 const TIME_RE = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i
 
 export function parseFlightValue(value: string | null | undefined): ParsedFlight {
@@ -42,17 +41,17 @@ export function parseFlightValue(value: string | null | undefined): ParsedFlight
   if (tokens.length === 0) return { airport: '', time: '', flight: '', minutes: null }
 
   let airport = ''
-  let flight = ''
 
   if (AIRPORT_RE.test(tokens[0].toUpperCase())) {
     airport = tokens.shift()!.toUpperCase()
   }
 
-  if (tokens.length > 1 && FLIGHT_RE.test(tokens[tokens.length - 1])) {
-    flight = tokens.pop()!.toUpperCase()
-  }
-
-  const time = tokens.join(' ')
+  const timeIndex = tokens.findIndex((token) => parseTimeToMinutes(token) !== null)
+  const time = timeIndex >= 0 ? tokens[timeIndex] : ''
+  const flight = tokens
+    .filter((_, index) => index !== timeIndex)
+    .join(' ')
+    .toUpperCase()
 
   return {
     airport,

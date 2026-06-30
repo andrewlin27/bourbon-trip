@@ -26,7 +26,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
   const [mode, setMode] = useState<'all' | 'mine'>('all')
   const matches = buildFlightMatches(users)
   const personalizedMatches = buildPersonalizedFlightMatches(users, currentUserId)
-  const incompleteLegs = getFlightLegs(users).filter((leg) => leg.minutes === null)
+  const incompleteLegs = getFlightLegs(users).filter((leg) => leg.minutes === null || !leg.flight)
   const hasAnyFlights = users.some((user) => user.flight_arrival || user.flight_departure)
   const hasPersonalFlight = personalizedMatches.currentUserLegs.length > 0
   const activeMatches = mode === 'mine' ? personalizedMatches : matches
@@ -92,7 +92,7 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
             <div>
               <h2 className="text-sm font-semibold text-amber-900">Needs flight details</h2>
               <p className="text-xs text-amber-700 mt-0.5">
-                Missing times will not appear in one-hour matches.
+                Missing times cannot appear in nearby-time matches. Missing flight numbers cannot appear in exact-flight matches.
               </p>
             </div>
             <span className="text-xs font-medium text-amber-700">{incompleteLegs.length}</span>
@@ -105,7 +105,9 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
                   <p className="text-xs text-amber-700 capitalize">{leg.kind}</p>
                 </div>
                 <p className="text-xs text-amber-800 text-right">
-                  Missing time
+                  {leg.minutes === null && 'Missing time'}
+                  {leg.minutes === null && !leg.flight && ' · '}
+                  {!leg.flight && 'Missing flight'}
                 </p>
               </div>
             ))}
@@ -114,17 +116,19 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
       )}
 
       <FlightGroupSection
-        title={mode === 'mine' ? 'Your Same Flights' : 'Same Flight'}
+        title={mode === 'mine' ? 'Your Exact Flights' : 'Exact Flights'}
         emptyText={mode === 'mine' ? 'No one shares your flight numbers yet.' : 'No shared flight numbers yet.'}
         groups={activeMatches.sameFlights}
         currentUserId={currentUserId}
+        description="People with the same flight number entered."
         showFlight
       />
       <FlightGroupSection
-        title={mode === 'mine' ? 'Near Your Times' : 'One-Hour Windows'}
+        title={mode === 'mine' ? 'Near Your Times' : 'Nearby Times'}
         emptyText={mode === 'mine' ? 'No one is within one hour of your times yet.' : 'No flight times within one hour yet.'}
         groups={activeMatches.closeAirportWindows}
         currentUserId={currentUserId}
+        description="People arriving or departing within an hour of each other."
         showWindow
       />
     </div>
@@ -136,6 +140,7 @@ function FlightGroupSection({
   emptyText,
   groups,
   currentUserId,
+  description,
   showFlight = false,
   showWindow = false,
 }: {
@@ -143,13 +148,17 @@ function FlightGroupSection({
   emptyText: string
   groups: FlightGroup[]
   currentUserId: string | null
+  description?: string
   showFlight?: boolean
   showWindow?: boolean
 }) {
   return (
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-3">
-        <h2 className="font-serif text-2xl font-bold text-bourbon-dark">{title}</h2>
+        <div>
+          <h2 className="font-serif text-2xl font-bold text-bourbon-dark">{title}</h2>
+          {description && <p className="text-xs text-stone-400 mt-0.5">{description}</p>}
+        </div>
         <span className="text-xs text-stone-400">{groups.length}</span>
       </div>
       {groups.length === 0 ? (
