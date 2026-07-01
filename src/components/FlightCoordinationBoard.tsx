@@ -26,7 +26,9 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
   const [mode, setMode] = useState<'all' | 'mine'>('all')
   const matches = buildFlightMatches(users)
   const personalizedMatches = buildPersonalizedFlightMatches(users, currentUserId)
-  const incompleteLegs = getFlightLegs(users).filter((leg) => leg.minutes === null)
+  const incompleteLegs = getFlightLegs(users).filter((leg) => leg.minutes === null || !leg.flight)
+  const incompleteUsers = new Set(incompleteLegs.map((leg) => leg.userId)).size
+  const usersWithFlightInfo = users.filter((user) => user.flight_arrival || user.flight_departure).length
   const hasAnyFlights = users.some((user) => user.flight_arrival || user.flight_departure)
   const hasPersonalFlight = personalizedMatches.currentUserLegs.length > 0
   const activeMatches = mode === 'mine' ? personalizedMatches : matches
@@ -41,6 +43,24 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
 
   return (
     <div className="space-y-8">
+      <section className="grid gap-3 sm:grid-cols-3">
+        <FlightSummaryStat
+          label="Travelers with flight info"
+          value={usersWithFlightInfo}
+          helper={`${usersWithFlightInfo} ${pluralize(usersWithFlightInfo, 'person', 'people')} entered arrival or departure details`}
+        />
+        <FlightSummaryStat
+          label="Exact-flight groups"
+          value={matches.sameFlights.length}
+          helper="Same flight number and direction"
+        />
+        <FlightSummaryStat
+          label="Nearby-time groups"
+          value={matches.closeAirportWindows.length}
+          helper="Different flights within one hour"
+        />
+      </section>
+
       {currentUserId && (
         <div className="bg-white border border-stone-200 rounded-xl p-1 grid grid-cols-2 gap-1">
           <button
@@ -92,10 +112,12 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
             <div>
               <h2 className="text-sm font-semibold text-amber-900">Needs flight details</h2>
               <p className="text-xs text-amber-700 mt-0.5">
-                Missing times will not appear in one-hour matches.
+                Missing times cannot appear in nearby-time matches. Missing flight numbers cannot appear in exact-flight matches.
               </p>
             </div>
-            <span className="text-xs font-medium text-amber-700">{incompleteLegs.length}</span>
+            <span className="text-xs font-medium text-amber-700">
+              {incompleteUsers} {pluralize(incompleteUsers, 'person', 'people')}
+            </span>
           </div>
           <div className="mt-3 divide-y divide-amber-200/70">
             {incompleteLegs.map((leg) => (
@@ -105,7 +127,9 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
                   <p className="text-xs text-amber-700 capitalize">{leg.kind}</p>
                 </div>
                 <p className="text-xs text-amber-800 text-right">
-                  Missing time
+                  {leg.minutes === null && 'Missing time'}
+                  {leg.minutes === null && !leg.flight && ' · '}
+                  {!leg.flight && 'Missing flight'}
                 </p>
               </div>
             ))}
@@ -114,21 +138,39 @@ export default function FlightCoordinationBoard({ users, currentUserId }: Props)
       )}
 
       <FlightGroupSection
-        title={mode === 'mine' ? 'Your Same Flights' : 'Same Flight'}
-        description="People on the exact same flight number."
+        title={mode === 'mine' ? 'Your Exact Flights' : 'Exact Flights'}
         emptyText={mode === 'mine' ? 'No one shares your flight numbers yet.' : 'No shared flight numbers yet.'}
         groups={activeMatches.sameFlights}
         currentUserId={currentUserId}
+        description="People with the same flight number entered."
         showFlight
       />
       <FlightGroupSection
-        title={mode === 'mine' ? 'Near Your Times' : 'One-Hour Windows'}
-        description="People arriving or departing within an hour of each other."
+        title={mode === 'mine' ? 'Near Your Times' : 'Nearby Times'}
         emptyText={mode === 'mine' ? 'No one is within one hour of your times yet.' : 'No flight times within one hour yet.'}
         groups={activeMatches.closeAirportWindows}
         currentUserId={currentUserId}
+        description="People on different flights arriving or departing within an hour of each other."
         showWindow
       />
+    </div>
+  )
+}
+
+function FlightSummaryStat({
+  label,
+  value,
+  helper,
+}: {
+  label: string
+  value: number
+  helper: string
+}) {
+  return (
+    <div className="bg-white border border-stone-200 rounded-xl px-4 py-3">
+      <p className="text-xs font-medium uppercase tracking-wide text-stone-400">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-bourbon-dark">{value}</p>
+      <p className="mt-1 text-xs text-stone-500">{helper}</p>
     </div>
   )
 }
@@ -180,6 +222,10 @@ function FlightGroupSection({
   )
 }
 
+function pluralize(count: number, singular: string, plural = `${singular}s`) {
+  return count === 1 ? singular : plural
+}
+
 function FlightGroupCard({
   group,
   currentUserId,
@@ -214,15 +260,84 @@ function FlightGroupCard({
           </span>
         )}
       </div>
-      <div className="divide-y divide-stone-100">
-        {group.travelers.map((traveler) => (
-          <TravelerRow
-            key={`${group.key}:${traveler.userId}:${traveler.flight}`}
-            traveler={traveler}
-            isCurrentUser={traveler.userId === currentUserId}
-          />
-        ))}
-      </div>
+      {showWindow ? (
+        <div className="divide-y divide-stone-100">
+          {getNearbyDisplayRows(group.travelers).map((row) =>
+            row.travelers.length > 1 ? (
+              <FlightClusterRow
+                key={`${group.key}:${row.identity}`}
+                travelers={row.travelers}
+                currentUserId={currentUserId}
+              />
+            ) : (
+              <TravelerRow
+                key={`${group.key}:${row.travelers[0].userId}:${row.travelers[0].flight}`}
+                traveler={row.travelers[0]}
+                isCurrentUser={row.travelers[0].userId === currentUserId}
+              />
+            )
+          )}
+        </div>
+      ) : (
+        <div className="divide-y divide-stone-100">
+          {group.travelers.map((traveler) => (
+            <TravelerRow
+              key={`${group.key}:${traveler.userId}:${traveler.flight}`}
+              traveler={traveler}
+              isCurrentUser={traveler.userId === currentUserId}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function getNearbyDisplayRows(travelers: FlightLeg[]) {
+  const groups = new Map<string, FlightLeg[]>()
+
+  for (const traveler of travelers) {
+    const identity = traveler.flight || traveler.userId
+    groups.set(identity, [...(groups.get(identity) ?? []), traveler])
+  }
+
+  return [...groups.entries()].map(([identity, groupedTravelers]) => ({
+    identity,
+    travelers: groupedTravelers,
+  }))
+}
+
+function FlightClusterRow({
+  travelers,
+  currentUserId,
+}: {
+  travelers: FlightLeg[]
+  currentUserId: string | null
+}) {
+  const firstTraveler = travelers[0]
+  const includesCurrentUser = travelers.some((traveler) => traveler.userId === currentUserId)
+  const names = travelers.map((traveler) => traveler.userName).join(', ')
+
+  return (
+    <div className="flex items-start justify-between gap-3 py-2 first:pt-0 last:pb-0">
+      <span className="min-w-0 text-sm font-medium text-stone-800">
+        <span className="flex flex-wrap items-center gap-2">
+          <span>{firstTraveler.flight} Group</span>
+          <span className="text-xs font-normal text-stone-400">
+            {travelers.length} {pluralize(travelers.length, 'traveler')}
+          </span>
+          {includesCurrentUser && (
+            <span className="text-[10px] uppercase tracking-wide bg-bourbon-amber/10 text-bourbon-rust px-1.5 py-0.5 rounded">
+              You
+            </span>
+          )}
+        </span>
+        <span className="mt-0.5 block truncate text-xs font-normal text-stone-400">{names}</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-2 text-xs text-stone-500">
+        {firstTraveler.time && <span>{formatFlightDisplayTime(firstTraveler.time)}</span>}
+        {firstTraveler.flight && <span className="font-mono text-stone-400">{firstTraveler.flight}</span>}
+      </span>
     </div>
   )
 }

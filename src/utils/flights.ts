@@ -34,7 +34,6 @@ export interface PersonalizedFlightMatches extends FlightMatches {
 }
 
 const AIRPORT_RE = /^[A-Z]{3}$/
-const FLIGHT_RE = /^[A-Z0-9]{2,4}\d{1,4}[A-Z]?$/i
 const TIME_RE = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i
 
 export function parseFlightValue(value: string | null | undefined): ParsedFlight {
@@ -42,17 +41,17 @@ export function parseFlightValue(value: string | null | undefined): ParsedFlight
   if (tokens.length === 0) return { airport: '', time: '', flight: '', minutes: null }
 
   let airport = ''
-  let flight = ''
 
   if (AIRPORT_RE.test(tokens[0].toUpperCase())) {
     airport = tokens.shift()!.toUpperCase()
   }
 
-  if (tokens.length > 1 && FLIGHT_RE.test(tokens[tokens.length - 1])) {
-    flight = tokens.pop()!.toUpperCase()
-  }
-
-  const time = tokens.join(' ')
+  const timeIndex = tokens.findIndex((token) => parseTimeToMinutes(token) !== null)
+  const time = timeIndex >= 0 ? tokens[timeIndex] : ''
+  const flight = tokens
+    .filter((_, index) => index !== timeIndex)
+    .join(' ')
+    .toUpperCase()
 
   return {
     airport,
@@ -227,7 +226,7 @@ function buildCloseAirportWindows(legs: FlightLeg[]): FlightGroup[] {
           return Math.abs(leg.minutes - base.minutes!) <= 60
         })
 
-        if (travelers.length > 1) {
+        if (travelers.length > 1 && hasMultipleFlightIdentities(travelers)) {
           travelers.forEach((leg) => used.add(leg.userId))
           windows.push({
             key: `${group.key}:${base.minutes}`,
@@ -252,7 +251,9 @@ function buildPersonalCloseAirportWindows(legs: FlightLeg[], currentUserLegs: Fl
           return false
         }
 
-        return leg.kind === currentLeg.kind && Math.abs(leg.minutes - currentLeg.minutes) <= 60
+        return leg.kind === currentLeg.kind &&
+          !isSameFlight(leg, currentLeg) &&
+          Math.abs(leg.minutes - currentLeg.minutes) <= 60
       })
 
       return {
@@ -286,6 +287,18 @@ function compareKind(a: FlightKind, b: FlightKind): number {
 
 function getGroupStartMinutes(group: FlightGroup): number {
   return group.travelers.find((traveler) => traveler.minutes !== null)?.minutes ?? Number.MAX_SAFE_INTEGER
+}
+
+function hasMultipleFlightIdentities(travelers: FlightLeg[]): boolean {
+  return new Set(travelers.map(getFlightIdentity)).size > 1
+}
+
+function isSameFlight(a: FlightLeg, b: FlightLeg): boolean {
+  return !!a.flight && !!b.flight && a.flight === b.flight
+}
+
+function getFlightIdentity(traveler: FlightLeg): string {
+  return traveler.flight || `missing-flight:${traveler.userId}`
 }
 
 function sortTravelers(travelers: FlightLeg[]): FlightLeg[] {
