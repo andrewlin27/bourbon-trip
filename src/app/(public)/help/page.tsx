@@ -47,7 +47,7 @@ export default function HelpPage() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-bourbon-amber mb-2">During the Trip</p>
               <ul className="space-y-1">
-                {['Correctly answering a guide\'s question (1 pt)', 'Guide compliments one\'s knowledge (3 pts)', 'Ask a guide to ask us a question after each distillery; correctly answer (2 pts)', 'Funny moment (2 pts)'].map((item) => (
+                {['Correctly answering a guide\'s question (1 pt)', 'Guide compliments one\'s knowledge (3 pts)', 'Ask a guide to ask us a question after each distillery experience; correctly answer (2 pts)', 'Funny moment (2 pts)'].map((item) => (
                   <li key={item} className="flex items-start gap-2 text-sm text-stone-700">
                     <span className="w-1.5 h-1.5 rounded-full bg-bourbon-amber shrink-0 mt-1.5" />
                     {item}
@@ -56,7 +56,7 @@ export default function HelpPage() {
                 <li className="flex items-start gap-2 text-sm text-stone-700">
                   <span className="w-1.5 h-1.5 rounded-full bg-bourbon-amber shrink-0 mt-1.5" />
                   <span>
-                    Legendary moment (3pts)
+                    Legendary moment (3 pts)
                     <ul className="mt-1 space-y-0.5">
                       {['Great speech', 'Incredible photo', 'Hilarious quote', 'Recruiting neutral parties at bars'].map((method) => (
                         <li key={method} className="flex items-center gap-2 text-stone-700">
@@ -79,10 +79,9 @@ export default function HelpPage() {
           </p>
           <ul className="space-y-2">
             {[
-              ['MVP', 'Most enhanced the overall trip through contribution, entertainment, and performance.'],
+              ['MVP', 'Most enhanced the overall trip through team and committee contribution, entertainment, and performance.'],
               ['Bus MVP', 'Most enhanced the bus experience; turned transportation time into part of the trip.'],
-              ['All-Bourbon First Team', 'The best bourbon connoisseurs of the trip.'],
-              ['Committee of the Year', undefined],
+              ['All-Bourbon First Team', 'The top 3-5 MVP vote recipients.'],
               ['Best Outfit', undefined],
               ['Biggest Liability', undefined],
             ].map(([title, desc]) => (
