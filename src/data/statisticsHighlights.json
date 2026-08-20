@@ -1,0 +1,52 @@
+{
+  "awards": {
+    "funniestMember": {
+      "person": "Eric McGonagle",
+      "value": 0.3333,
+      "messages": 39,
+      "label": "laughs per message"
+    },
+    "socialButterfly": {
+      "person": "Nick Caso",
+      "value": 18,
+      "label": "different members supported"
+    },
+    "mostLovable": {
+      "person": "Nate Matthews",
+      "value": 39,
+      "label": "love reactions received"
+    },
+    "officialEditor": {
+      "person": "Nick Dittemore",
+      "value": 69,
+      "total": 84,
+      "label": "pen reactions given"
+    }
+  },
+  "acceleration": [
+    { "label": "Messages per day", "change": 162 },
+    { "label": "Laughs per day", "change": 267 },
+    { "label": "Reactions per day", "change": 132 },
+    { "label": "Reps per day", "change": 75 }
+  ],
+  "chatReps": [
+    {
+      "title": "The Hype Man",
+      "person": "Kyle Dessens",
+      "value": "248 reactions given",
+      "caption": "Kyle brought enough applause for everyone."
+    },
+    {
+      "title": "The Novelist",
+      "person": "Andrew Lin",
+      "value": "87 characters per message",
+      "caption": "Why send one sentence when a paragraph is available?"
+    },
+    {
+      "title": "Most Consistently Online",
+      "person": "Nate Matthews",
+      "value": "72 active days",
+      "caption": "Attendance: impeccable. Screen time: classified."
+    }
+  ]
+}
