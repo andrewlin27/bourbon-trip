@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: '/roster', label: 'Roster' },
   { href: '/score', label: 'Score' },
   { href: '/power-rankings', label: 'Rankings' },
+  { href: '/statistics', label: 'Wrapped' },
   { href: '/spin', label: 'Spin' },
   { href: '/help', label: 'Help' },
 ]
